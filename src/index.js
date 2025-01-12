@@ -76,7 +76,7 @@ data: [["Reina.1729", "2", "2", "2", "2"],
   }
 }).render(document.getElementById("wrapper"));
 
-new gridjs.Grid({columns: ["Last Run"],data: [["01/12/2025 01:34:25"]],		
+new gridjs.Grid({columns: ["Last Run"],data: [["01/12/2025 01:42:32"]],		
 	
   style: {
     table: {
