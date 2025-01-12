@@ -94,6 +94,6 @@ new gridjs.Grid({columns: ["Last Run"],data: [["01/12/2025 01:20:08"]],
       'text-align': 'left'	 
     }
   }
-}).render(document.getElementById("DateTime"));
+}).render(document.getElementById("wrapper"));
 
 
