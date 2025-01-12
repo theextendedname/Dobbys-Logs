@@ -76,7 +76,7 @@ data: [["Reina.1729", "2", "2", "2", "2"],
   }
 }).render(document.getElementById("wrapper"));
 
-new gridjs.Grid({columns: ["Last Run"],data: [["01/12/2025 01:20:08"]],		
+new gridjs.Grid({columns: ["Last Run"],data: [["01/12/2025 01:34:25"]],		
 	
   style: {
     table: {
@@ -91,7 +91,7 @@ new gridjs.Grid({columns: ["Last Run"],data: [["01/12/2025 01:20:08"]],
    td: {
 	   'background-color': 'rgb(88,88,88)',
       'color': '#FFFFFF',
-      'text-align': 'left'	 
+      'text-align': 'center'	 
     }
   }
 }).render(document.getElementById("datetime"));
