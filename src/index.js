@@ -76,4 +76,24 @@ data: [["Reina.1729", "2", "2", "2", "2"],
   }
 }).render(document.getElementById("wrapper"));
 
+new gridjs.Grid({columns: ["Last Run"],data: [["01/12/2025 01:20:08"]],		
+	
+  style: {
+    table: {
+      'border': '3px solid #ccc'
+    },
+    th: {
+      'background-color': 'rgb(32,32,32)',
+      'color': '#FFFFFF',
+      'border-bottom': '3px solid #ccc',
+      'text-align': 'center'
+    },
+   td: {
+	   'background-color': 'rgb(88,88,88)',
+      'color': '#FFFFFF',
+      'text-align': 'left'	 
+    }
+  }
+}).render(document.getElementById("DateTime"));
+
 
