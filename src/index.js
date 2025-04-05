@@ -1,6 +1,6 @@
 new gridjs.Grid({
 columns: ["Account Name", "7-Day Attend", "7D-Signed-Up",  "30-Day Attend",  "30D-Signed-Up"], 
-data: [["Reina.1729", "1", "1", "7", "6"],
+data: [["Reina.1729", "2", "2", "8", "7"],
 ["theextendedname.4879", "2", "2", "10", "10"],
 ["Batercus.6257", "2", "2", "7", "6"],
 ["Bloop.2831", "2", "1", "10", "5"],
@@ -16,7 +16,7 @@ data: [["Reina.1729", "1", "1", "7", "6"],
 ["Beer Meister.5938", "1", "1", "1", "1"],
 ["Limoncello.9201", "1", "1", "1", "1"],
 ["cmdrpengu.3012", "1", "1", "5", "5"],
-["ItIsAllAboutCake.6125", "1", "0", "6", "5"],
+["ItIsAllAboutCake.6125", "2", "0", "7", "5"],
 ["Calgari.8671", "0", "0", "1", "1"],
 ["Biot.7201", "2", "2", "7", "6"],
 ["Ity.3504", "0", "0", "2", "0"],
@@ -45,8 +45,8 @@ data: [["Reina.1729", "1", "1", "7", "6"],
 ["DeepToot.4127", "2", "2", "2", "2"],
 ["jtheoof.9205", "0", "0", "0", "0"],
 ["MarcB.1853", "1", "0", "1", "0"],
-["Chii.4082", "0", "0", "0", "0"],
-["Nexle.8320", "0", "0", "0", "0"],
+["Chii.4082", "1", "0", "1", "0"],
+["Nexle.8320", "1", "0", "1", "0"],
 ["Chauncley.9140", "0", "0", "0", "0"],
 ["CursedHour.4251", "0", "0", "0", "0"],
 ["Antidextrous.3291", "0", "0", "0", "0"],
@@ -72,7 +72,7 @@ data: [["Reina.1729", "1", "1", "7", "6"],
   }
 }).render(document.getElementById("wrapper"));
 
-new gridjs.Grid({columns: ["Last Run"],data: [["04/05/2025 00:21:44"]],		
+new gridjs.Grid({columns: ["Last Run"],data: [["04/05/2025 10:21:32"]],		
 	
   style: {
     table: {
