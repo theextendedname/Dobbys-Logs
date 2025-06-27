@@ -45,7 +45,7 @@
             top: 22px;
             bottom: -22px;
             width: 2px;
-            background-color: #e5e7eb; 
+            background-color: #e5e7eb;
         }
         .timeline-item:last-child::before {
             display: none;
@@ -60,7 +60,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 4px solid #f0f4f8; 
+            border: 4px solid #f0f4f8;
         }
     </style>
 </head>
@@ -74,10 +74,10 @@
         </header>
 
         <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            
+
             <div class="md:col-span-1 lg:col-span-1 p-6 rounded-2xl shadow-lg flex flex-col justify-center items-center text-center kpi-card">
                 <h3 class="text-xl font-bold uppercase tracking-wider text-white/80">Total Raids</h3>
-                <p class="kpi-number">11</p>
+                <p class="kpi-number">10</p>
                 <p class="font-medium">events scheduled this week</p>
             </div>
             <div class="md:col-span-1 lg:col-span-1 p-6 bg-white rounded-2xl shadow-lg flex flex-col justify-center items-center text-center">
@@ -97,7 +97,7 @@
                 <div class="grid grid-cols-1 xl:grid-cols-7 gap-x-6 gap-y-8">
                     <div class="xl:col-span-1">
                         <h3 class="font-bold text-xl mb-4 text-[#F24405]">Sunday</h3>
-                        <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#00A6A6]"></div><p class="font-semibold">🏆 SOCK raid</p><p class="text-sm text-gray-600">8:00 AM EST (05h00 PST)</p></div>
+                        <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#00A6A6]"></div><p class="font-semibold">🏆 SOCK raid</p><p class="text-sm text-gray-600">8:00 PM EST (17h00 PST)</p><p class="text-xs text-gray-500">Lead: Mocha Joe</p></div>
                         <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#75B54A]"></div><p class="font-semibold">⚔️ PACK raid</p><p class="text-sm text-gray-600">8:00 PM EST (17h00 PST)</p><p class="text-xs text-gray-500">Lead: Pycachu</p></div>
                     </div>
                     <div class="xl:col-span-1">
@@ -124,8 +124,7 @@
                      <div class="xl:col-span-1">
                         <h3 class="font-bold text-xl mb-4 text-[#F24405]">Saturday</h3>
                         <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#00A6A6]"></div><p class="font-semibold">🏆 SOCK raid</p><p class="text-sm text-gray-600">8:00 AM EST (05h00 PST)</p><p class="text-xs text-gray-500">Lead: Bloop</p></div>
-                        <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#00A6A6]"></div><p class="font-semibold">🏆 SOCK raid</p><p class="text-sm text-gray-600">8:00 PM EST (17h00 PST)</p><p class="text-xs text-gray-500">Lead: Mocha Joe</p></div>
-                        <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#75B54A]"></div><p class="font-semibold">⚔️ PACK raid</p><p class="text-sm text-gray-600">8:00 PM EST (17h00 PST)</p><p class="text-xs text-gray-500">Lead: Evo</p></div>
+                        <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#F29F05]"></div><p class="font-semibold">⚔️ FAM raid</p><p class="text-sm text-gray-600">8:00 PM EST (17h00 PST)</p><p class="text-xs text-gray-500">Lead: Evo</p></div>
                     </div>
                 </div>
             </section>
@@ -137,7 +136,7 @@
                     <canvas id="raidTypesChart"></canvas>
                 </div>
             </section>
-            
+
             <section class="md:col-span-1 lg:col-span-2 bg-white p-6 rounded-2xl shadow-lg">
                 <h2 class="text-2xl font-bold mb-1 text-center">Raid Leaderboard</h2>
                 <p class="text-center text-gray-500 mb-4">This chart shows the number of raids each member is leading. Graven and Bloop are tied for the most raids this week.</p>
@@ -145,7 +144,7 @@
                     <canvas id="raidLeadersChart"></canvas>
                 </div>
             </section>
-            
+
             <section class="md:col-span-2 lg:col-span-3 bg-white p-6 rounded-2xl shadow-lg">
                 <h2 class="text-2xl font-bold mb-1 text-center">Daily Raid Activity</h2>
                  <p class="text-center text-gray-500 mb-4">This bar chart shows the total number of raids scheduled for each day, highlighting that Saturday is our busiest day.</p>
@@ -201,7 +200,7 @@
                     }
                 }
             };
-            
+
             Chart.defaults.font.family = "'Inter', sans-serif";
             Chart.defaults.font.weight = '500';
             Chart.defaults.color = FONT_COLOR;
@@ -214,7 +213,7 @@
                         labels: ['SOCK Raids', 'PACK Raids', 'FAM Raids'],
                         datasets: [{
                             label: 'Number of Raids',
-                            data: [5, 4, 2],
+                            data: [4, 3, 3], /* Updated data */
                             backgroundColor: [PALETTE.blue, PALETTE.green, PALETTE.yellow],
                             borderColor: '#ffffff',
                             borderWidth: 4,
@@ -248,7 +247,7 @@
                         labels: ['Graven', 'Bloop', 'Pycachu', 'Vin', 'Batercus', 'Mocha Joe', 'Evo'],
                         datasets: [{
                             label: 'Raids Led',
-                            data: [2, 2, 1, 1, 1, 1, 1],
+                            data: [2, 2, 1, 1, 1, 1, 1], /* Data remains the same for individual leader counts */
                             backgroundColor: [
                                 PALETTE.orange, PALETTE.orange, PALETTE.blue, PALETTE.yellow, PALETTE.blue, PALETTE.blue, PALETTE.green
                             ],
@@ -296,7 +295,7 @@
                         labels: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
                         datasets: [{
                             label: 'Total Raids',
-                            data: [2, 1, 2, 1, 1, 1, 3],
+                            data: [2, 1, 2, 1, 1, 1, 2], /* Updated data */
                             backgroundColor: [
                                 PALETTE.red, PALETTE.orange, PALETTE.yellow, PALETTE.green, PALETTE.blue, PALETTE.orange, PALETTE.red
                             ],
