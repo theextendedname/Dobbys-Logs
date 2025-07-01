@@ -29,7 +29,6 @@ data: [["Reina.1729", "3", "2", "3", "2"],
 ["jtheoof.9205", "0", "0", "0", "0"],
 ["MarcB.1853", "2", "2", "8", "8"],
 ["Nexle.8320", "4", "3", "10", "5"],
-["Delacroix NA.4358", "3", "0", "8", "0"],
 ["Soushi.5132", "4", "0", "9", "0"],
 ["sachaa.8706", "5", "0", "11", "0"],
 ["Zugare.9032", "1", "1", "3", "3"],
@@ -75,7 +74,7 @@ data: [["Reina.1729", "3", "2", "3", "2"],
   }
 }).render(document.getElementById("wrapper"));
 
-new gridjs.Grid({columns: ["Last Run"],data: [["07/01/2025 10:10:24"]],		
+new gridjs.Grid({columns: ["Last Run"],data: [["07/01/2025 15:05:50"]],		
 	
   style: {
     table: {
