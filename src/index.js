@@ -6,6 +6,7 @@ data: [["Reina.1729", "4", "3", "4", "3"],
 ["Bloop.2831", "5", "4", "17", "13"],
 ["Suricatta.1029", "1", "1", "4", "4"],
 ["morsel.4670", "6", "6", "19", "18"],
+["LiLMochaJoe.7456", "1", "1", "1", "1"],
 ["Kharashadora.9043", "1", "0", "3", "0"],
 ["KrimsonWolf.6781", "3", "3", "10", "10"],
 ["Beer Meister.5938", "0", "0", "3", "3"],
@@ -21,6 +22,7 @@ data: [["Reina.1729", "4", "3", "4", "3"],
 ["Grootella.1270", "4", "3", "12", "10"],
 ["Swagasarus.6150", "4", "0", "11", "4"],
 ["Dirddle.8524", "6", "0", "15", "3"],
+["Stay Alive.2917", "1", "1", "1", "1"],
 ["sadmantha.6841", "5", "4", "15", "13"],
 ["Mori.8729", "3", "0", "5", "0"],
 ["JCthirteen.1985", "2", "2", "2", "2"],
@@ -76,7 +78,7 @@ data: [["Reina.1729", "4", "3", "4", "3"],
   }
 }).render(document.getElementById("wrapper"));
 
-new gridjs.Grid({columns: ["Last Run"],data: [["07/01/2025 21:47:10"]],		
+new gridjs.Grid({columns: ["Last Run"],data: [["07/01/2025 22:04:42"]],		
 	
   style: {
     table: {
