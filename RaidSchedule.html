@@ -9,6 +9,65 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+    // Function to fetch and process the timestamp
+    async function loadAndDisplayMinutes() {
+        try {
+            // Fetch the timestamp from the file in the same directory
+            const response = await fetch('incidentTS');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const incidentTS = (await response.text()).trim();
+            
+            // Get the HTML elements to update
+            const minutesElement = document.querySelector('.kpi-number.text-\\[\\#75B54A\\]');
+            const labelElement = document.querySelector('.font-medium.text-gray-300.light\\:text-gray-600');
+            const headingElement = document.querySelector('h3.text-xl.font-bold.uppercase.tracking-wider.text-gray-400');
+
+            // Parse the timestamp string
+            const [datePart, timePart] = incidentTS.split('_');
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hour, minute, second] = timePart.split('-').map(Number);
+
+            // Note: Month in JavaScript's Date object is 0-indexed (0 for January, 11 for December)
+            const incidentDate = new Date(year, month - 1, day, hour, minute, second);
+
+            function updateTimeDisplay() {
+                const now = new Date();
+                const minutesElapsed = Math.floor((now - incidentDate) / 1000 / 60);
+                
+                // Update the display with minutes
+                minutesElement.textContent = minutesElapsed;
+                
+                // Update the heading and label
+                headingElement.textContent = 'Minutes without incident';
+                if (minutesElapsed === 1) {
+                    labelElement.textContent = 'minute since last inappropriate voice chat';
+                } else {
+                    labelElement.textContent = 'minutes since last inappropriate voice chat';
+                }
+            }
+
+            // Call the function to update the display immediately and then every minute
+            updateTimeDisplay();
+            setInterval(updateTimeDisplay, 60000); // 60000 milliseconds = 1 minute
+
+        } catch (error) {
+            console.error('Could not fetch the incident timestamp file:', error);
+            // Fallback to display an error message if the file can't be loaded
+            const minutesElement = document.querySelector('.kpi-number.text-\\[\\#75B54A\\]');
+            minutesElement.textContent = 'N/A';
+            const labelElement = document.querySelector('.font-medium.text-gray-300.light\\:text-gray-600');
+            labelElement.textContent = 'Error loading timestamp';
+        }
+    }
+    
+    loadAndDisplayMinutes();
+});
+</script>
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -153,29 +212,33 @@
             
             <section class="md:col-span-2 lg:col-span-3 p-6 rounded-2xl shadow-lg bg-gray-800 light:bg-white">
                 <h2 class="text-2xl font-bold mb-1 text-center text-gray-200 light:text-gray-800">The Full Weekly Schedule</h2>
-                <p class="text-center text-gray-400 mb-8 light:text-gray-600">PACK 🐺 •  SOCK 🧦 •  KILL ☠️ <br> 🏆 Chill PPT/Fighting • ⚔️ Fighting</p>           
+                <p class="text-center text-gray-400 mb-8 light:text-gray-600">PACK 🐺 •  SOCK 🧦 •  KILL ☠️ • DAWN 🌞 <br> 🏆 Chill PPT/Fighting • ⚔️ Fighting</p>           
                 <div class="grid grid-cols-1 xl:grid-cols-7 gap-x-6 gap-y-8">
                     <div class="xl:col-span-1">
                         <h3 class="font-bold text-xl mb-4 text-[#F24405]">Sunday</h3>
                         <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#00A6A6]">🧦</div><p class="font-semibold text-gray-200 light:text-gray-800">🏆 SOCK raid</p><p class="text-sm text-gray-400 light:text-gray-600">8:00 AM EST (05h00 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Bloop</p></div>
                         <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#F24405]">☠️</div><p class="font-semibold text-gray-200 light:text-gray-800">🏆 KILL raid</p><p class="text-sm text-gray-400 light:text-gray-600">5:30 PM EST (14h30 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Luci</p></div>
+                        <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#00A6A6]">🌞</div><p class="font-semibold text-gray-200 light:text-gray-800">⚔️ DAWN raid</p><p class="text-sm text-gray-400 light:text-gray-600">6:30 AM EST (15h30 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Morthuus</p></div>
                         <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#00A6A6]">🧦</div><p class="font-semibold text-gray-200 light:text-gray-800">🏆 SOCK raid</p><p class="text-sm text-gray-400 light:text-gray-600">8:00 PM EST (17h00 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Mocha Joe</p></div>
                         <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#75B54A]">🐺</div><p class="font-semibold text-gray-200 light:text-gray-800">⚔️ PACK raid</p><p class="text-sm text-gray-400 light:text-gray-600">8:00 PM EST (17h00 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Eledia</p></div>
                     </div>
                     <div class="xl:col-span-1">
                         <h3 class="font-bold text-xl mb-4 text-[#F24405]">Monday</h3>
-                        <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#F24405]">☠️</div><p class="font-semibold text-gray-200 light:text-gray-800">🏆 KILL raid</p><p class="text-sm text-gray-400 light:text-gray-600">5:30 PM EST (14h30 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Luci</p></div>                        
+                        <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#F24405]">☠️</div><p class="font-semibold text-gray-200 light:text-gray-800">🏆 KILL raid</p><p class="text-sm text-gray-400 light:text-gray-600">5:30 PM EST (14h30 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Luci</p></div>
+                        <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#00A6A6]">🌞</div><p class="font-semibold text-gray-200 light:text-gray-800">⚔️ DAWN raid</p><p class="text-sm text-gray-400 light:text-gray-600">6:30 AM EST (15h30 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Morthuus</p></div>                        
                         <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#75B54A]">🐺</div><p class="font-semibold text-gray-200 light:text-gray-800">⚔️ PACK raid</p><p class="text-sm text-gray-400 light:text-gray-600">8:00 PM EST (17h00 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Pycachu</p></div>
                     </div>
                      <div class="xl:col-span-1">
                         <h3 class="font-bold text-xl mb-4 text-[#F24405]">Tuesday</h3>
                         <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#00A6A6]">🧦</div><p class="font-semibold text-gray-200 light:text-gray-800">🏆 SOCK raid</p><p class="text-sm text-gray-400 light:text-gray-600">8:00 AM EST (05h00 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Bloop</p></div>
                         <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#F24405]">☠️</div><p class="font-semibold text-gray-200 light:text-gray-800">🏆 KILL raid</p><p class="text-sm text-gray-400 light:text-gray-600">5:30 PM EST (14h30 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Luci</p></div>
+                        <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#00A6A6]">🌞</div><p class="font-semibold text-gray-200 light:text-gray-800">⚔️ DAWN raid</p><p class="text-sm text-gray-400 light:text-gray-600">6:30 AM EST (15h30 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Morthuus</p></div>
                         <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#00A6A6]">🧦</div><p class="font-semibold text-gray-200 light:text-gray-800">🏆 SOCK raid</p><p class="text-sm text-gray-400 light:text-gray-600">8:00 PM EST (17h00 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Vin</p></div>
                     </div>
                     <div class="xl:col-span-1">
                         <h3 class="font-bold text-xl mb-4 text-[#F24405]">Wednesday</h3>
                         <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#F24405]">☠️</div><p class="font-semibold text-gray-200 light:text-gray-800">🏆 KILL raid</p><p class="text-sm text-gray-400 light:text-gray-600">5:30 PM EST (14h30 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Luci</p></div>
+                        <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#00A6A6]">🌞</div><p class="font-semibold text-gray-200 light:text-gray-800">⚔️ DAWN raid</p><p class="text-sm text-gray-400 light:text-gray-600">6:30 AM EST (15h30 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Morthuus</p></div>                        
                          <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#75B54A]">🐺</div><p class="font-semibold text-gray-200 light:text-gray-800">⚔️ PACK raid</p><p class="text-sm text-gray-400 light:text-gray-600">8:00 PM EST (17h00 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Evo</p></div>
                     </div>
                     <div class="xl:col-span-1">
@@ -185,6 +248,7 @@
                     </div>
                     <div class="xl:col-span-1">
                         <h3 class="font-bold text-xl mb-4 text-[#F24405]">Friday</h3>
+                        <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#00A6A6]">🧦</div><p class="font-semibold text-gray-200 light:text-gray-800">🏆 SOCK raid</p><p class="text-sm text-gray-400 light:text-gray-600">8:00 AM EST (05h00 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Nyoom</p></div>
                         <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#F24405]">☠️</div><p class="font-semibold text-gray-200 light:text-gray-800">🏆 KILL raid</p><p class="text-sm text-gray-400 light:text-gray-600">5:30 PM EST (14h30 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Luci</p></div>
                         <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#F29F05]">🐹</div><p class="font-semibold text-gray-200 light:text-gray-800">🏆 FAM raid</p><p class="text-sm text-gray-400 light:text-gray-600">10:00 PM EST (19h00 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: (Rotation)</p></div>
                         <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#F24405]">☠️</div><p class="font-semibold text-gray-200 light:text-gray-800">🏆 KILL raid</p><p class="text-sm text-gray-400 light:text-gray-600">10:00 PM EST (19h00 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Tiny</p></div>
@@ -193,8 +257,9 @@
                         <h3 class="font-bold text-xl mb-4 text-[#F24405]">Saturday</h3>
                         <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#00A6A6]">🧦</div><p class="font-semibold text-gray-200 light:text-gray-800">🏆 SOCK raid</p><p class="text-sm text-gray-400 light:text-gray-600">8:00 AM EST (05h00 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Reina</p></div>
                         <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#F24405]">☠️</div><p class="font-semibold text-gray-200 light:text-gray-800">🏆 KILL raid</p><p class="text-sm text-gray-400 light:text-gray-600">5:30 PM EST (14h30 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Tora/Reaper</p></div>
+                        <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#00A6A6]">🌞</div><p class="font-semibold text-gray-200 light:text-gray-800">⚔️ DAWN raid</p><p class="text-sm text-gray-400 light:text-gray-600">6:30 AM EST (15h30 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Morthuus</p></div>
                         <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#F29F05]">🐹</div><p class="font-semibold text-gray-200 light:text-gray-800">⚔️ FAM raid</p><p class="text-sm text-gray-400 light:text-gray-600">8:00 PM EST (17h00 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: (Rotation)</p></div>
-                        <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#F24405]">☠️</div><p class="font-semibold text-gray-200 light:text-gray-800">🏆 KILL raid</p><p class="text-sm text-gray-400 light:text-gray-600">9:30 PM EST (18h30 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Tiny</p></div>
+                        <div class="relative pl-8 timeline-item"><div class="timeline-icon bg-[#00A6A6]">☠️</div><p class="font-semibold text-gray-200 light:text-gray-800">🏆 KILL raid</p><p class="text-sm text-gray-400 light:text-gray-600">9:30 PM EST (18h30 PST)</p><p class="text-xs text-gray-500 light:text-gray-500">Lead: Tiny</p></div>
                     </div>
                 </div>
             </section>
@@ -209,9 +274,9 @@
                 <p class="font-medium text-gray-300 light:text-gray-600">members leading the charge</p>
             </div>
             <div class="md:col-span-2 lg:col-span-1 p-6 rounded-2xl shadow-lg flex flex-col justify-center items-center text-center bg-gray-800 light:bg-white">
-                <h3 class="text-xl font-bold uppercase tracking-wider text-gray-400 light:text-gray-500">Days without incident</h3>
+                <h3 class="text-xl font-bold uppercase tracking-wider text-gray-400 light:text-gray-500">Minutes without incident</h3>
                 <p class="kpi-number text-[#75B54A]">0</p>
-                <p class="font-medium text-gray-300 light:text-gray-600">Days since last inappropriate voice chat</p>
+                <p class="font-medium text-gray-300 light:text-gray-600">Minutes since last inappropriate voice chat</p>
             </div>
 
         </main>
