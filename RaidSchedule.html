@@ -8,65 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-    // Function to fetch and process the timestamp
-    async function loadAndDisplayMinutes() {
-        try {
-            // Fetch the timestamp from the file in the same directory
-            const response = await fetch('incidentTS');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const incidentTS = (await response.text()).trim();
-            
-            // Get the HTML elements to update
-            const minutesElement = document.querySelector('.kpi-number.text-\\[\\#75B54A\\]');
-            const labelElement = document.querySelector('.font-medium.text-gray-300.light\\:text-gray-600');
-            const headingElement = document.querySelector('h3.text-xl.font-bold.uppercase.tracking-wider.text-gray-400');
-
-            // Parse the timestamp string
-            const [datePart, timePart] = incidentTS.split('_');
-            const [year, month, day] = datePart.split('-').map(Number);
-            const [hour, minute, second] = timePart.split('-').map(Number);
-
-            // Note: Month in JavaScript's Date object is 0-indexed (0 for January, 11 for December)
-            const incidentDate = new Date(year, month - 1, day, hour, minute, second);
-
-            function updateTimeDisplay() {
-                const now = new Date();
-                const minutesElapsed = Math.floor((now - incidentDate) / 1000 / 60);
-                
-                // Update the display with minutes
-                minutesElement.textContent = minutesElapsed;
-                
-                // Update the heading and label
-                //headingElement.textContent = 'Minutes without incident';
-                //if (minutesElapsed === 1) {
-                    //labelElement.textContent = 'minute since last inappropriate voice chat';
-                //} else {
-                //    labelElement.textContent = 'minutes since last inappropriate voice chat';
-                //}
-            }
-
-            // Call the function to update the display immediately and then every minute
-            updateTimeDisplay();
-            setInterval(updateTimeDisplay, 60000); // 60000 milliseconds = 1 minute
-
-        } catch (error) {
-            console.error('Could not fetch the incident timestamp file:', error);
-            // Fallback to display an error message if the file can't be loaded
-            const minutesElement = document.querySelector('.kpi-number.text-\\[\\#75B54A\\]');
-            minutesElement.textContent = 'N/A';
-            const labelElement = document.querySelector('.font-medium.text-gray-300.light\\:text-gray-600');
-            labelElement.textContent = 'Error loading timestamp';
-        }
-    }
-    
-    loadAndDisplayMinutes();
-});
-</script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">    
 
     <style>
         body {
@@ -274,9 +216,9 @@
                 <p class="font-medium text-gray-300 light:text-gray-600">members leading the charge</p>
             </div>
             <div class="md:col-span-2 lg:col-span-1 p-6 rounded-2xl shadow-lg flex flex-col justify-center items-center text-center bg-gray-800 light:bg-white">
-                <h3 class="text-xl font-bold uppercase tracking-wider text-gray-400 light:text-gray-500">Minutes without incident</h3>
+                <h3 class="text-xl font-bold uppercase tracking-wider text-gray-400 light:text-gray-500">Days without incident</h3>
                 <p class="kpi-number text-[#75B54A]">0</p>
-                <p class="font-medium text-gray-300 light:text-gray-600">Minutes since last inappropriate voice chat</p>
+                <p class="font-medium text-gray-300 light:text-gray-600">Days since last inappropriate voice chat</p>
             </div>
 
         </main>
