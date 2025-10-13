@@ -22,7 +22,7 @@ data: [		],
   }
 }).render(document.getElementById("wrapper"));
 
-new gridjs.Grid({columns: ["Last Run"],data: [["10/12/2025 10:05:21"]],		
+new gridjs.Grid({columns: ["Last Run"],data: [["10/12/2025 22:06:06"]],		
 	
   style: {
     table: {
