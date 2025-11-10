@@ -3,27 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raffle Winner Picker</title>
+    <title>SOCK Attendance Raffle Picker</title>
+    
+    <!-- 1. Custom Definition to Capture Data -->
+    <script>
+        // Global object to store the data captured from index.js
+        window.raffleDataConfig = {};
+
+        // Define a minimal placeholder for 'gridjs' and its 'Grid' constructor.
+        // This prevents the "gridjs is not defined" error without needing the library.
+        window.gridjs = {
+            Grid: function(config) {
+                // *** FIX APPLIED HERE: Only capture data if raffleDataConfig.columns is currently undefined.
+                // This ensures we only use the configuration from the FIRST call to new gridjs.Grid() ***
+                if (!window.raffleDataConfig.columns && config && config.columns && config.data) {
+                    window.raffleDataConfig.columns = config.columns;
+                    window.raffleDataConfig.data = config.data;
+                }
+                // Return a dummy object for the render function
+                return {
+                    render: function() {}
+                };
+            }
+        };
+    </script>
+
+    <!-- 2. Load External Data Script -->
+    <!-- This runs immediately after the definition above and populates window.raffleDataConfig -->
+    <script src="src/index.js"></script>
+
+    <!-- 3. Styles from the previous stylesheet -->
     <style>
-        /* Styles copied from stylesheet.txt */
         body {
-            font-family: 'Inter', sans-serif; /* cite: 1 */
-            background-color: #1a202c; /* Dark mode background */ /* cite: 2 */
-            color: #e2e8f0; /* Light text for dark background */ /* cite: 3 */
-            transition: background-color 0.3s ease, color 0.3s ease; /* cite: 3 */
-        }
-        body.light-mode {
-            background-color: #f0f4f8; /* Light mode background */ /* cite: 4, 5 */
-            color: #6b7280; /* Dark text for light background */ /* cite: 6 */
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Dark mode background */
+            color: #e2e8f0; /* Light text for dark background */
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         .kpi-card {
-            background-color: #F29F05; /* Original KPI card color */ /* cite: 7 */
-            color: white; /* cite: 8 */
-        }
-        .kpi-number {
-            font-weight: 900; /* cite: 9 */
-            font-size: 4rem; /* cite: 9 */
-            line-height: 1; /* cite: 9 */
+            background-color: #F29F05; /* Original KPI card color */
+            color: white;
         }
         /* Custom styles for the slot machine and button */
         .slot-machine {
@@ -34,7 +53,7 @@
         }
         .slot {
             background-color: #4a5568; 
-            border: 4px solid #F29F05; /* cite: 7 */
+            border: 4px solid #F29F05;
             border-radius: 8px;
             margin: 0 10px;
             width: 300px;
@@ -62,7 +81,7 @@
             font-size: 1.5rem;
             font-weight: bold;
             cursor: pointer;
-            background-color: #00A6A6; /* cite: 27 */
+            background-color: #00A6A6; /* Accent color */
             color: white;
             border: none;
             border-radius: 6px;
@@ -79,18 +98,16 @@
             text-align: center;
             margin-top: 30px;
             font-size: 1.5rem;
-            color: #F29F05; /* cite: 7 */
+            color: #F29F05;
             min-height: 40px;
         }
     </style>
-    
-    <script src="src/index.js"></script>
 </head>
 <body>
 
-    <h1 style="text-align: center; margin-top: 50px;">🍀 Raffle Winner Picker 🍀</h1>
+    <h1 style="text-align: center; margin-top: 50px;">🍀 SOCK Attendance Raffle Picker 🍀</h1>
 
-    <div class="winner-display" id="winner-message">Loading data...</div>
+    <div class="winner-display" id="winner-message">Processing data from last 30 days...</div>
 
     <div class="slot-machine">
         <div class="slot" id="slot-container-1"><div class="slot-inner">?</div></div>
@@ -101,12 +118,12 @@
     <button class="draw-button" id="draw-button" disabled>Draw Winner</button>
 
     <script>
-        // --- Global Variables (will be set by extractRaffleData) ---
+        // --- Global Variables ---
         let raffleEntries = [];
-        let globalRawData = [];
-        let globalColumns = [];
+        // Required names, stripped of spaces for aggressive comparison
+        const requiredColumnsAgnostic = ["accountname", "30-dayattend", "30d-signed-up"]; 
 
-        // --- Get DOM elements ---
+        // --- Get DOM elements (omitted) ---
         const slots = [
             document.getElementById('slot-container-1'),
             document.getElementById('slot-container-2'),
@@ -118,29 +135,48 @@
         const maxDrawDuration = 3000;
         const slotInterval = 100;
 
+        /**
+         * Cleans a string by converting to lowercase and removing all whitespace globally.
+         */
+        function cleanString(str) {
+            return String(str).toLowerCase().replace(/\s/g, '').trim();
+        }
+
         // --- Core Data Processing Function ---
-        function extractRaffleData(dataConfig) {
-            // dataConfig is the object passed to new gridjs.Grid()
+        function initializeRaffleData() {
+            const dataConfig = window.raffleDataConfig;
             const columns = dataConfig.columns;
             const rawData = dataConfig.data;
             let entries = [];
             
             if (!columns || !rawData) {
-                console.error("Data structure not found in gridjs configuration.");
-                return entries;
+                winnerMessage.textContent = "Error: Could not extract columns and data from index.js (check if the first gridjs.Grid call contains both).";
+                return;
+            }
+            
+            // Step 1: Normalize all file columns aggressively
+            const normalizedFileColumns = columns.map(cleanString);
+
+            // Step 2: Find indices using the normalized array
+            const accountNameIndex = normalizedFileColumns.indexOf(requiredColumnsAgnostic[0]);
+            const attend30DIndex = normalizedFileColumns.indexOf(requiredColumnsAgnostic[1]);
+            const signedUp30DIndex = normalizedFileColumns.indexOf(requiredColumnsAgnostic[2]);
+
+            // Step 3: Verify success
+            if (accountNameIndex === -1 || attend30DIndex === -1 || signedUp30DIndex === -1) {
+                winnerMessage.textContent = `Error: Required columns ('Account Name', '30-Day Attend', '30D-Signed-Up') not found in the FIRST grid configuration.`;
+                return;
             }
 
-            const accountNameIndex = columns.indexOf("Account Name");
-            const attend30DIndex = columns.indexOf("30-Day Attend");
-            const signedUp30DIndex = columns.indexOf("30D-Signed-Up");
-
+            // Step 4: Calculate entries
             rawData.forEach(row => {
                 const accountName = row[accountNameIndex];
-                const attend = parseInt(row[attend30DIndex]);
-                const signedUp = parseInt(row[signedUp30DIndex]);
+                // Ensure values are parsed as integers, defaulting to 0
+                const attend = parseInt(row[attend30DIndex]) || 0;
+                const signedUp = parseInt(row[signedUp30DIndex]) || 0;
                 let entryCount = 0;
 
-                // Logic: entries = min(attend, signedUp) IF both > 0, otherwise 0
+                // Raffle Logic: entries = min(attend, signedUp) IF both > 0, otherwise 0
                 if (attend > 0 && signedUp > 0) {
                     entryCount = Math.min(attend, signedUp);
                 }
@@ -151,15 +187,21 @@
                 }
             });
 
-            return entries;
+            // Step 5: Initialize UI
+            raffleEntries = entries;
+            if (raffleEntries.length > 0) {
+                winnerMessage.textContent = `Total Raffle Entries: ${raffleEntries.length} based on the last 30 days. Click "Draw Winner" to begin!`;
+                drawButton.disabled = false;
+                drawButton.addEventListener('click', startRaffleDraw);
+            } else {
+                winnerMessage.textContent = "No accounts have qualified entries (30D Attend and 30D Signed-Up must be > 0)!";
+                drawButton.disabled = true;
+            }
         }
 
-        // --- Slot Machine Logic (Remains the same) ---
+        // --- Slot Machine Logic ---
         function pickWinner() {
-            if (raffleEntries.length === 0) {
-                winnerMessage.textContent = "No valid entries for the raffle!";
-                return null;
-            }
+            if (raffleEntries.length === 0) return null;
             const randomIndex = Math.floor(Math.random() * raffleEntries.length);
             return raffleEntries[randomIndex];
         }
@@ -179,7 +221,6 @@
                             const currentValue = raffleEntries[randomIndex] || "?";
                             slotInner.textContent = currentValue;
                         }
-                        
                         requestAnimationFrame(step);
                     } else {
                         slotInner.textContent = finalValue;
@@ -219,38 +260,8 @@
             drawButton.disabled = false;
         }
 
-        // --- Global Overrides for Data Loading ---
-        // Since index.js runs the gridjs constructor globally, we hijack it 
-        // to capture the data configuration before gridjs uses it.
-        const originalGrid = window.gridjs.Grid;
-        
-        window.gridjs.Grid = function(config) {
-            // 2. Capture the data and columns from the first grid configuration
-            if (config.columns && config.data && config.columns.includes("Account Name")) {
-                raffleEntries = extractRaffleData(config);
-
-                // 3. Initialize the UI after processing data
-                if (raffleEntries.length > 0) {
-                    winnerMessage.textContent = `Total Raffle Entries: ${raffleEntries.length}. Click "Draw Winner" to begin!`;
-                    drawButton.disabled = false;
-                } else {
-                    winnerMessage.textContent = "No accounts have qualified entries (30D Attend and 30D Signed-Up must be > 0)!";
-                    drawButton.disabled = true;
-                }
-                
-                // Set the event listener once the button is ready
-                drawButton.addEventListener('click', startRaffleDraw);
-            }
-
-            // 4. Run the original gridjs constructor as intended for the table rendering
-            return new originalGrid(config);
-        };
-        
-        // --- Final Check (If index.js runs before this script, the gridjs.Grid override will capture the data) ---
-        // If your environment requires a specific order: 
-        // 1. Load the gridjs library.
-        // 2. Define the window.gridjs.Grid override (this script).
-        // 3. Load src/index.js.
+        // --- Execute Data Processing after all scripts and the DOM are loaded ---
+        document.addEventListener('DOMContentLoaded', initializeRaffleData);
 
     </script>
 </body>
