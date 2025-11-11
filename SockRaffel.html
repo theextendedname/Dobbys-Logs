@@ -141,7 +141,16 @@
         function cleanString(str) {
             return String(str).toLowerCase().replace(/\s/g, '').trim();
         }
-
+        /**
+         * Performs a Fisher-Yates shuffle on the array in-place.
+         * @param {Array} array 
+         */
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
         // --- Core Data Processing Function ---
         function initializeRaffleData() {
             const dataConfig = window.raffleDataConfig;
@@ -186,7 +195,9 @@
                     entries.push(accountName);
                 }
             });
-
+            //Step4.5 Randomize the entries array
+            shuffleArray(entries);
+        
             // Step 5: Initialize UI
             raffleEntries = entries;
             if (raffleEntries.length > 0) {
