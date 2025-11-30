@@ -28,8 +28,8 @@
     <style>
         /*
          * --- ORIGINAL BODY STYLE MODIFIED ---
-         * The Dobby-Picks.jpg image is set as the default background.
-         * A ::before pseudo-element is used to create a 50% opacity dark overlay over the image.
+         * 1. The Dobby-Picks.png image is now set with the correct path 'src/Dobby-Picks.png'.
+         * 2. A ::before pseudo-element is used to create a 50% opacity dark overlay over the image.
         */
         body {
             font-family: 'Inter', sans-serif;
@@ -38,8 +38,8 @@
             transition: background-color 0.3s ease, color 0.3s ease, background-image 0.5s ease-in-out; 
             position: relative; 
             
-            /* --- NEW DEFAULT BACKGROUND IMAGE STYLES --- */
-            background-image: url('src/Dobby-Picks.png'); /* The uploaded image file */
+            /* --- NEW DEFAULT BACKGROUND IMAGE STYLES (PATH UPDATED) --- */
+            background-image: url('src/Dobby-Picks.png'); /* UPDATED PATH */
             background-size: cover; 
             background-repeat: no-repeat; 
             background-position: center center; 
@@ -60,9 +60,6 @@
             z-index: -1; /* Place it behind the content */
             pointer-events: none; /* Allows clicks to pass through */
         }
-        
-        /* --- TEMPORARY BACKGROUND STYLE REMOVED --- */
-        /* .drawing-background styles have been deleted. */
 
         /* Custom styles for the slot machine and button */
         .slot-machine {
@@ -240,7 +237,8 @@
         const entryCountValue = document.getElementById('entry-count-value');
         const confettiContainer = document.getElementById('confetti-container'); 
 
-        const maxDrawDuration = 3000;
+        // --- UPDATED: maxDrawDuration increased to 8000ms (8 seconds) ---
+        const maxDrawDuration = 8000; 
         const slotInterval = 100;
         const confettiColors = ['#F29F05', '#00A6A6', '#ffcc00', '#FFFFFF', '#FF6B6B', '#4ECDC4'];
 
@@ -404,12 +402,10 @@
             
             drawButton.disabled = true;
             winnerMessage.textContent = "Drawing in progress...";
-            // body.classList.add('drawing-background'); // REMOVED: Feature to change background during draw
             
             const winner = pickWinner();
             if (!winner) {
                 drawButton.disabled = false;
-                // body.classList.remove('drawing-background'); // REMOVED: Feature to change background during draw
                 return;
             }
 
@@ -417,8 +413,9 @@
                 slot.querySelector('.slot-inner').textContent = '?';
             });
 
+            // UPDATED: First slot duration is maxDrawDuration (8000ms).
             await Promise.all([
-                rollSlot(slots[0], winner, maxDrawDuration, 0),
+                rollSlot(slots[0], winner, maxDrawDuration, 0), 
                 rollSlot(slots[1], winner, maxDrawDuration + 500, 200),
                 rollSlot(slots[2], winner, maxDrawDuration + 1000, 400)
             ]);
@@ -428,7 +425,6 @@
             setTimeout(() => {
                 winnerMessage.textContent = `🎉 Congratulations to the winner: ${winner}! 🎉`;
                 drawButton.disabled = false;
-                // body.classList.remove('drawing-background'); // REMOVED: Feature to change background during draw
             }, 500);
         }
 
