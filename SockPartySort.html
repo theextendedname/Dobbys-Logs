@@ -106,7 +106,7 @@
             <h2 class="text-2xl font-semibold mb-4">1. Paste Sign-up List and Select Size</h2>
             
             <div class="mb-4">
-                <label for="participant-count" class="block text-sm font-medium mb-1">Select Total Participants/Groups:</label>
+                <label for="participant-count" class="block text-sm font-medium mb-1">Select Total Participants/Groups (Initial):</label>
                 <select id="participant-count" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm rounded-md bg-gray-800 text-white">
                     <option value="30">30 Participants (7 Groups)</option>
                     <option value="40">40 Participants (9 Groups)</option>
@@ -126,6 +126,16 @@
 
         <div id="grid-section" class="hidden mt-8">
             <h2 class="text-2xl font-semibold mb-4">2. Proposed Squad Composition</h2>
+
+            <div class="mb-4">
+                <label for="grid-participant-count" class="block text-sm font-medium mb-1">Adjust Visible Groups:</label>
+                <select id="grid-participant-count" onchange="updateGridSize()" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm rounded-md bg-gray-800 text-white">
+                    <option value="30">30 Participants (7 Groups)</option>
+                    <option value="40">40 Participants (9 Groups)</option>
+                    <option value="50">50 Participants (11 Groups)</option>
+                </select>
+            </div>
+
             <div id="squad-grid" class="overflow-x-auto">
                 </div>
             <button onclick="resetApp()" class="mt-6 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition duration-150">
@@ -136,6 +146,9 @@
     </div>
 
     <script>
+        // Global variable to store parsed roster for dynamic resizing
+        window.currentRoster = null;
+        
         // --- Configuration ---
         const ROLES = {
             'AOE DPS': 'role-aoe-dps',
@@ -179,7 +192,7 @@
         // --- Core Application Logic ---
 
         function parseSignupList(text) {
-            // Step 1: FIX - Aggressively clean the input text to remove Discord emoji placeholders and non-printing characters.
+            // Step 1: Aggressively clean the input text to remove Discord emoji placeholders and non-printing characters.
             let cleanedText = text;
             // 1a. Remove Discord emoji placeholders (:word:) and the space/tab that often follows.
             cleanedText = cleanedText.replace(/:\w+:\s*/g, ' '); 
@@ -188,8 +201,6 @@
             // 1c. Remove any leading/trailing spaces from the overall block.
             cleanedText = cleanedText.trim();
             
-            // Re-split into lines after cleaning
-            // Note: This still relies on each role being on a separate line for accurate parsing.
             const lines = cleanedText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
             
             const roster = {};
@@ -228,6 +239,9 @@
             const gridContainer = document.getElementById('squad-grid');
             gridContainer.innerHTML = ''; // Clear previous grid
 
+            // Deep clone the roster queues for consumption in the grid
+            const tempRoster = JSON.parse(JSON.stringify(roster));
+
             let html = `
                 <table class="min-w-full divide-y divide-gray-600 rounded-lg overflow-hidden shadow-2xl">
                     <thead class="bg-gray-800/80">
@@ -256,29 +270,29 @@
             `;
 
             // Prepare queues for roles
-            const commanderQueue = roster['Commander'] || [];
+            const commanderQueue = tempRoster['Commander'] || [];
             
             // MAPPING: Main Healer players go into Healer queue
-            const mainHealerQueue = roster['Main Healer'] || [];
-            const healerQueue = (roster['Healer'] || []).concat(mainHealerQueue);
+            const mainHealerQueue = tempRoster['Main Healer'] || [];
+            const healerQueue = (tempRoster['Healer'] || []).concat(mainHealerQueue);
             
             // MAPPING: Secondary Support players go into Boon Support queue
-            const secondarySupportQueue = roster['Secondary Support'] || [];
-            const boonSupportQueue = (roster['Boon Support'] || []).concat(secondarySupportQueue);
+            const secondarySupportQueue = tempRoster['Secondary Support'] || [];
+            const boonSupportQueue = (tempRoster['Boon Support'] || []).concat(secondarySupportQueue);
             
-            const supportSpellbreakerQueue = roster['Support Spellbreaker'] || [];
-            const dpsQueue = roster['DPS'] || [];
+            const supportSpellbreakerQueue = tempRoster['Support Spellbreaker'] || [];
+            const dpsQueue = tempRoster['DPS'] || [];
             
             // MAPPING: Boon Strips & Pulls players go into AOE DPS pool
-            const boonStripsAndPullsQueue = roster['Boon Strips & Pulls'] || [];
+            const boonStripsAndPullsQueue = tempRoster['Boon Strips & Pulls'] || [];
             
             // Merge all AOE DPS types and Boon Strips & Pulls into a single pool
-            const aoeDpsQueue = Object.keys(roster)
+            const aoeDpsQueue = Object.keys(tempRoster)
                 .filter(role => role.startsWith('AOE DPS'))
-                .flatMap(role => roster[role])
+                .flatMap(role => tempRoster[role])
                 .concat(boonStripsAndPullsQueue);
 
-            const mainStabsQueue = roster['Main Stabs'] || [];
+            const mainStabsQueue = tempRoster['Main Stabs'] || [];
 
             // Helper to dequeue a player or provide placeholder
             const getNextPlayer = (queue) => queue.shift() || '... EMPTY ...';
@@ -291,9 +305,9 @@
                 rowHtml += `<td class="px-3 py-2 whitespace-nowrap font-medium">Group ${i}</td>`;
 
                 if (i === 1) {
-                    // Group 1: Remains Empty (5 empty cells)
+                    // Group 1: Lobby (5 cells) - FIX implemented here
                     for (let j = 0; j < 5; j++) {
-                        rowHtml += `<td class="px-3 py-2 whitespace-nowrap role-empty opacity-50 text-center">EMPTY</td>`;
+                        rowHtml += `<td class="px-3 py-2 whitespace-nowrap role-empty opacity-50 text-center">Lobby</td>`;
                     }
                 } else if (i === 2) {
                     // Group 2: Commander (in AOE DPS column), Healer, Boon Support, DPS, Main Stabs
@@ -368,7 +382,6 @@
         function processList() {
             const signupText = document.getElementById('signup-list').value;
             const selectedCount = document.getElementById('participant-count').value;
-            const totalGroups = GROUP_CONFIGS[selectedCount];
 
             if (!signupText.trim()) {
                 alert('Please paste the sign-up list.');
@@ -377,6 +390,17 @@
 
             const roster = parseSignupList(signupText);
             
+            // Store roster globally for resizing functionality
+            window.currentRoster = roster;
+
+            const totalGroups = GROUP_CONFIGS[selectedCount];
+
+            // Synchronize the resizing dropdown with the initial selection
+            const gridCountSelect = document.getElementById('grid-participant-count');
+            if (gridCountSelect) {
+                gridCountSelect.value = selectedCount;
+            }
+            
             buildSquadGrid(roster, totalGroups);
 
             // Hide input, show grid
@@ -384,8 +408,19 @@
             document.getElementById('grid-section').classList.remove('hidden');
         }
 
+        function updateGridSize() {
+            if (!window.currentRoster) return; // Roster must be parsed first
+
+            const selectedCount = document.getElementById('grid-participant-count').value;
+            const totalGroups = GROUP_CONFIGS[selectedCount];
+            
+            // Re-run the grid builder with the stored roster and new group count
+            buildSquadGrid(window.currentRoster, totalGroups);
+        }
+
         function resetApp() {
             document.getElementById('signup-list').value = '';
+            window.currentRoster = null;
             document.getElementById('grid-section').classList.add('hidden');
             document.getElementById('input-section').classList.remove('hidden');
             document.getElementById('squad-grid').innerHTML = '';
