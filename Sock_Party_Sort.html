@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Squad Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Dark mode background */
+            color: #e2e8f0;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body.light-mode {
+            background-color: #f0f4f8;
+            color: #6b7280;
+        }
+        .kpi-card {
+            background-color: #F29F05;
+            color: white;
+        }
+        .kpi-number {
+            font-weight: 900;
+            font-size: 4rem;
+            line-height: 1;
+        }
+        /* ... (rest of the theme/timeline CSS from stylesheet.txt is omitted for brevity but included in the code block) */
+        
+        /* Toggle Switch Styling - (Adapted from stylesheet.txt) */
+        .toggle-switch {
+            position: absolute;
+            top: 5px;
+            left: 20px;
+            z-index: 10;
+        }
+        .toggle-switch input[type="checkbox"] {
+            height: 0;
+            width: 0;
+            visibility: hidden;
+        }
+        .toggle-switch label {
+            cursor: pointer;
+            text-indent: -9999px;
+            width: 60px;
+            height: 30px;
+            background: #4a5568;
+            display: block;
+            border-radius: 100px;
+            position: relative;
+        }
+        body.light-mode .toggle-switch label {
+            background: #cbd5e0;
+        }
+        .toggle-switch label:after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: #fff;
+            border-radius: 90px;
+            transition: 0.3s;
+        }
+        .toggle-switch input:checked + label {
+            background: #00A6A6;
+        }
+        .toggle-switch input:checked + label:after {
+            left: calc(100% - 3px);
+            transform: translateX(-100%);
+        }
+        .toggle-switch .sun-icon { right: 8px; color: #cbd5e0; }
+        .toggle-switch .moon-icon { left: 8px; color: #fff; }
+        body.light-mode .toggle-switch .sun-icon { color: #fff; }
+        body.light-mode .toggle-switch .moon-icon { color: #4a5568; }
+
+        /* Custom Role Colors */
+        .role-aoe-dps { background-color: #8FBC8F; /* Sickly Green */ }
+        .role-healer { background-color: #ADD8E6; /* Light Blue */ }
+        .role-boon-support { background-color: #FFB6C1; /* Light Pink */ }
+        .role-dps { background-color: #F08080; /* Light Red */ }
+        .role-main-stabs { background-color: #FFFFE0; /* Light Yellow */ color: #1a202c; } 
+        .role-commander { background-color: #F29F05; /* KPI Color for Commander */ }
+        .role-empty { background-color: #4a5568; /* Darker grey for empty slots */ }
+    </style>
+</head>
+<body class="p-6 min-h-screen">
+
+    <div class="toggle-switch">
+        <input type="checkbox" id="theme-toggle" onchange="toggleTheme()">
+        <label for="theme-toggle">Toggle</label>
+        <span class="toggle-icon sun-icon">&#9728;</span> <span class="toggle-icon moon-icon">&#9790;</span> </div>
+
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-4xl font-bold mb-8 text-center">Squad Builder</h1>
+
+        <div id="input-section" class="bg-gray-700/50 p-6 rounded-lg shadow-xl transition-all duration-500">
+            <h2 class="text-2xl font-semibold mb-4">1. Paste Sign-up List and Select Size</h2>
+            
+            <div class="mb-4">
+                <label for="participant-count" class="block text-sm font-medium mb-1">Select Total Participants/Groups:</label>
+                <select id="participant-count" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm rounded-md bg-gray-800 text-white">
+                    <option value="30">30 Participants (7 Groups)</option>
+                    <option value="40">40 Participants (9 Groups)</option>
+                    <option value="50">50 Participants (11 Groups)</option>
+                </select>
+            </div>
+            
+            <div class="mb-4">
+                <label for="signup-list" class="block text-sm font-medium mb-1">Paste Sign-up List Text Below:</label>
+                <textarea id="signup-list" rows="10" class="shadow-sm focus:ring-yellow-500 focus:border-yellow-500 block w-full sm:text-sm border-gray-600 rounded-md p-3 bg-gray-800 text-white" placeholder="Example:&#10;Participants (50/50):&#10; Commander (1/1)&#10;└ [SOCK] Dobby (DobbyisFree.2917) (DobbyisFree.2917)&#10; Boon Support (2/4)&#10;└ [SOCK] Hagrid (HagridBoonMaster.1743)&#10;..."></textarea>
+            </div>
+
+            <button onclick="processList()" class="w-full kpi-card hover:bg-yellow-600 text-white font-bold py-3 px-4 rounded transition duration-150">
+                Generate Squad Grid
+            </button>
+        </div>
+
+        <div id="grid-section" class="hidden mt-8">
+            <h2 class="text-2xl font-semibold mb-4">2. Proposed Squad Composition</h2>
+            <div id="squad-grid" class="overflow-x-auto">
+                </div>
+            <button onclick="resetApp()" class="mt-6 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition duration-150">
+                Reset / Enter New List
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Configuration ---
+        const ROLES = {
+            'AOE DPS': 'role-aoe-dps',
+            'Healer': 'role-healer',
+            'Boon Support': 'role-boon-support',
+            'DPS': 'role-dps',
+            'Main Stabs': 'role-main-stabs',
+            'Commander': 'role-commander',
+            'Support Spellbreaker': 'role-boon-support' // Maps to Boon Support slot, same color
+        };
+
+        const GROUP_CONFIGS = {
+            '30': 7, // 7 Groups for 30 participants
+            '40': 9, // 9 Groups for 40 participants
+            '50': 11 // 11 Groups for 50 participants
+        };
+        
+        // Groups 3 and 5 prioritize Support Spellbreaker
+        const SPELLBREAKER_GROUPS = [3, 5];
+
+        // --- Theme Toggle Logic ---
+        function toggleTheme() {
+            const isLightMode = document.getElementById('theme-toggle').checked;
+            if (isLightMode) {
+                document.body.classList.add('light-mode');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.body.classList.remove('light-mode');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Apply saved theme on load
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('theme') === 'light') {
+                document.getElementById('theme-toggle').checked = true;
+            }
+            toggleTheme();
+        });
+
+        // --- Core Application Logic ---
+
+        function parseSignupList(text) {
+            const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            const roster = {};
+            let currentRole = null;
+            
+            // Regex to match the role header: e.g., "Commander (1/1)"
+            const roleRegex = /^\s*([A-Za-z\s\/]+)\s*\(\d+\/\d+\):?\s*$/;
+            
+            // Regex to capture GW2 account names (Name.1234) inside parentheses globally
+            // This is the FIX: It captures all Name.1234 strings and we take the last one.
+            const accountNameRegex = /\(([^)]+\.\d{4})\)/g;
+
+            for (const line of lines) {
+                // Check for a new role header
+                const roleMatch = line.match(roleRegex);
+                if (roleMatch) {
+                    currentRole = roleMatch[1].trim();
+                    roster[currentRole] = roster[currentRole] || [];
+                    continue;
+                }
+
+                // Check for a player line (starts with '└' and contains account name)
+                if (currentRole && line.startsWith('└')) {
+                    const matches = [...line.matchAll(accountNameRegex)];
+                    
+                    if (matches.length > 0) {
+                        // The last matched group (index 1 of the last match) is the account name
+                        const accountName = matches[matches.length - 1][1];
+                        roster[currentRole].push(accountName);
+                    }
+                }
+            }
+            return roster;
+        }
+
+        function buildSquadGrid(roster, totalGroups) {
+            const gridContainer = document.getElementById('squad-grid');
+            gridContainer.innerHTML = ''; // Clear previous grid
+
+            let html = `
+                <table class="min-w-full divide-y divide-gray-600 rounded-lg overflow-hidden shadow-2xl">
+                    <thead class="bg-gray-800/80">
+                        <tr>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                                Group
+                            </th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider ${ROLES['AOE DPS']}">
+                                AOE DPS
+                            </th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider ${ROLES['Healer']}">
+                                Healer
+                            </th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider ${ROLES['Boon Support']}">
+                                Boon Support
+                            </th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider ${ROLES['DPS']}">
+                                DPS
+                            </th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider ${ROLES['Main Stabs']}">
+                                Main Stabs
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+            `;
+
+            // Prepare queues for roles
+            const commanderQueue = roster['Commander'] || [];
+            const healerQueue = roster['Healer'] || [];
+            const boonSupportQueue = roster['Boon Support'] || [];
+            const supportSpellbreakerQueue = roster['Support Spellbreaker'] || [];
+            const dpsQueue = roster['DPS'] || [];
+            
+            // Merge all AOE DPS types into a single pool (Scourge, Ritualist, etc.)
+            const aoeDpsQueue = Object.keys(roster)
+                .filter(role => role.startsWith('AOE DPS'))
+                .flatMap(role => roster[role]);
+
+            const mainStabsQueue = roster['Main Stabs'] || [];
+
+            // Helper to dequeue a player or provide placeholder
+            const getNextPlayer = (queue) => queue.shift() || '... EMPTY ...';
+            
+            // Loop for the required number of groups
+            for (let i = 1; i <= totalGroups; i++) {
+                let rowHtml = `<tr class="bg-gray-700/50 hover:bg-gray-600/50 transition-colors duration-150">`;
+
+                // 1. Group Label
+                rowHtml += `<td class="px-3 py-2 whitespace-nowrap font-medium">Group ${i}</td>`;
+
+                if (i === 1) {
+                    // Group 1: Remains Empty (5 empty cells)
+                    for (let j = 0; j < 5; j++) {
+                        rowHtml += `<td class="px-3 py-2 whitespace-nowrap role-empty opacity-50 text-center">EMPTY</td>`;
+                    }
+                } else if (i === 2) {
+                    // Group 2: Commander (in AOE DPS column), Healer, Boon Support, DPS, Main Stabs
+                    
+                    const slots = [];
+                    
+                    // Slot 1 (AOE DPS column) is the Commander (retaining color)
+                    slots.push({ player: getNextPlayer(commanderQueue), roleClass: ROLES['Commander'], roleName: 'Commander' });
+
+                    // Remaining Slots are standard
+                    slots.push({ player: getNextPlayer(healerQueue), roleClass: ROLES['Healer'], roleName: 'Healer' });
+                    slots.push({ player: getNextPlayer(boonSupportQueue), roleClass: ROLES['Boon Support'], roleName: 'Boon Support' });
+                    slots.push({ player: getNextPlayer(dpsQueue), roleClass: ROLES['DPS'], roleName: 'DPS' });
+                    slots.push({ player: getNextPlayer(mainStabsQueue), roleClass: ROLES['Main Stabs'], roleName: 'Main Stabs' });
+
+                    slots.forEach(slot => {
+                        const emptyClass = slot.player.includes('EMPTY') ? 'role-empty' : slot.roleClass;
+                        rowHtml += `<td class="px-3 py-2 whitespace-nowrap font-semibold ${emptyClass}" title="${slot.roleName}">${slot.player}</td>`;
+                    });
+
+                } else {
+                    // Groups 3+ (Standard or Spellbreaker variation)
+                    
+                    const slots = [];
+                    
+                    // Slot 1: AOE DPS
+                    slots.push({ player: getNextPlayer(aoeDpsQueue), roleClass: ROLES['AOE DPS'], roleName: 'AOE DPS' });
+
+                    // Slot 2: Healer
+                    slots.push({ player: getNextPlayer(healerQueue), roleClass: ROLES['Healer'], roleName: 'Healer' });
+
+                    // Slot 3: Boon Support OR Support Spellbreaker
+                    let player;
+                    let roleName;
+                    let roleClass = ROLES['Boon Support']; // Use Boon Support color for the slot
+
+                    if (SPELLBREAKER_GROUPS.includes(i) && supportSpellbreakerQueue.length > 0) {
+                        // Priority to Support Spellbreaker for Groups 3 and 5
+                        player = getNextPlayer(supportSpellbreakerQueue);
+                        roleName = 'Support Spellbreaker (Boon Support Slot)';
+                    } else {
+                        // Fallback to Boon Support Queue
+                        player = getNextPlayer(boonSupportQueue);
+                        roleName = 'Boon Support';
+                    }
+                    slots.push({ player, roleClass, roleName });
+
+                    // Slot 4: DPS
+                    slots.push({ player: getNextPlayer(dpsQueue), roleClass: ROLES['DPS'], roleName: 'DPS' });
+
+                    // Slot 5: Main Stabs
+                    slots.push({ player: getNextPlayer(mainStabsQueue), roleClass: ROLES['Main Stabs'], roleName: 'Main Stabs' });
+
+
+                    slots.forEach(slot => {
+                        const emptyClass = slot.player.includes('EMPTY') ? 'role-empty' : slot.roleClass;
+                        rowHtml += `<td class="px-3 py-2 whitespace-nowrap font-semibold ${emptyClass}" title="${slot.roleName}">${slot.player}</td>`;
+                    });
+                }
+
+                rowHtml += `</tr>`;
+                html += rowHtml;
+            }
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+            gridContainer.innerHTML = html;
+        }
+
+        function processList() {
+            const signupText = document.getElementById('signup-list').value;
+            const selectedCount = document.getElementById('participant-count').value;
+            const totalGroups = GROUP_CONFIGS[selectedCount];
+
+            if (!signupText.trim()) {
+                alert('Please paste the sign-up list.');
+                return;
+            }
+
+            const roster = parseSignupList(signupText);
+            
+            buildSquadGrid(roster, totalGroups);
+
+            // Hide input, show grid
+            document.getElementById('input-section').classList.add('hidden');
+            document.getElementById('grid-section').classList.remove('hidden');
+        }
+
+        function resetApp() {
+            document.getElementById('signup-list').value = '';
+            document.getElementById('grid-section').classList.add('hidden');
+            document.getElementById('input-section').classList.remove('hidden');
+            document.getElementById('squad-grid').innerHTML = '';
+        }
+
+    </script>
+</body>
+</html>
