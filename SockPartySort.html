@@ -25,7 +25,6 @@
             font-size: 4rem;
             line-height: 1;
         }
-        /* ... (rest of the theme/timeline CSS from stylesheet.txt is omitted for brevity but included in the code block) */
         
         /* Toggle Switch Styling - (Adapted from stylesheet.txt) */
         .toggle-switch {
@@ -74,18 +73,21 @@
         .toggle-switch .moon-icon { left: 8px; color: #fff; }
         body.light-mode .toggle-switch .sun-icon { color: #fff; }
         body.light-mode .toggle-switch .moon-icon { color: #4a5568; }
-        
-        /* Custom Role Colors - TEXT COLOR UPDATES APPLIED HERE */
+
+        /* Custom Role Colors - Text colors for light backgrounds */
         .role-aoe-dps { background-color: #8FBC8F; /* Sickly Green */ }
         
-        /* Updated: Healer column needs black font color */
+        /* Healer column: Light Blue, Black Text */
         .role-healer { background-color: #ADD8E6; /* Light Blue */ color: #1a202c; } 
         
-        /* Updated: Boon Support column needs black font color */
+        /* Boon Support column: Light Pink, Black Text */
         .role-boon-support { background-color: #FFB6C1; /* Light Pink */ color: #1a202c; } 
         
         .role-dps { background-color: #F08080; /* Light Red */ }
+        
+        /* Main Stabs column: Light Yellow, Black Text */
         .role-main-stabs { background-color: #FFFFE0; /* Light Yellow */ color: #1a202c; } 
+        
         .role-commander { background-color: #F29F05; /* Commander Color */ }
         .role-empty { background-color: #4a5568; /* Darker grey for empty slots */ }
     </style>
@@ -177,15 +179,26 @@
         // --- Core Application Logic ---
 
         function parseSignupList(text) {
-            const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            // Step 1: FIX - Aggressively clean the input text to remove Discord emoji placeholders and non-printing characters.
+            let cleanedText = text;
+            // 1a. Remove Discord emoji placeholders (:word:) and the space/tab that often follows.
+            cleanedText = cleanedText.replace(/:\w+:\s*/g, ' '); 
+            // 1b. Replace any zero-width space or similar characters.
+            cleanedText = cleanedText.replace(/[\u200B-\u200D\uFEFF]/g, '');
+            // 1c. Remove any leading/trailing spaces from the overall block.
+            cleanedText = cleanedText.trim();
+            
+            // Re-split into lines after cleaning
+            // Note: This still relies on each role being on a separate line for accurate parsing.
+            const lines = cleanedText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            
             const roster = {};
             let currentRole = null;
             
             // Regex to match the role header: e.g., "Commander (1/1)"
-            const roleRegex = /^\s*([A-Za-z\s\/]+)\s*\(\d+\/\d+\):?\s*$/;
+            const roleRegex = /^\s*([A-Za-z\s\/&]+)\s*\(\d+\/\d+\):?\s*$/; 
             
             // Regex to capture GW2 account names (Name.1234) inside parentheses globally
-            // This is the FIX: It captures all Name.1234 strings and we take the last one.
             const accountNameRegex = /\(([^)]+\.\d{4})\)/g;
 
             for (const line of lines) {
@@ -244,15 +257,26 @@
 
             // Prepare queues for roles
             const commanderQueue = roster['Commander'] || [];
-            const healerQueue = roster['Healer'] || [];
-            const boonSupportQueue = roster['Boon Support'] || [];
+            
+            // MAPPING: Main Healer players go into Healer queue
+            const mainHealerQueue = roster['Main Healer'] || [];
+            const healerQueue = (roster['Healer'] || []).concat(mainHealerQueue);
+            
+            // MAPPING: Secondary Support players go into Boon Support queue
+            const secondarySupportQueue = roster['Secondary Support'] || [];
+            const boonSupportQueue = (roster['Boon Support'] || []).concat(secondarySupportQueue);
+            
             const supportSpellbreakerQueue = roster['Support Spellbreaker'] || [];
             const dpsQueue = roster['DPS'] || [];
             
-            // Merge all AOE DPS types into a single pool (Scourge, Ritualist, etc.)
+            // MAPPING: Boon Strips & Pulls players go into AOE DPS pool
+            const boonStripsAndPullsQueue = roster['Boon Strips & Pulls'] || [];
+            
+            // Merge all AOE DPS types and Boon Strips & Pulls into a single pool
             const aoeDpsQueue = Object.keys(roster)
                 .filter(role => role.startsWith('AOE DPS'))
-                .flatMap(role => roster[role]);
+                .flatMap(role => roster[role])
+                .concat(boonStripsAndPullsQueue);
 
             const mainStabsQueue = roster['Main Stabs'] || [];
 
