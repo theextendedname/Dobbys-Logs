@@ -97,6 +97,13 @@
             outline: 2px solid #F29F05; /* Commander/KPI color for focus */
             background-color: #3b4252; /* Slightly lighter grey when focused */
         }
+        /* Style for drag and drop */
+        td[draggable="true"] {
+            cursor: grab;
+        }
+        td[draggable="true"]:active {
+            cursor: grabbing;
+        }
     </style>
 </head>
 <body class="p-6 min-h-screen">
@@ -155,6 +162,7 @@
     <script>
         // Global variable to store parsed roster for dynamic resizing
         window.currentRoster = null;
+        let draggedCell = null; // Global variable to hold the element being dragged
         
         // --- Configuration ---
         const ROLES = {
@@ -200,29 +208,89 @@
             toggleTheme();
         });
 
-        // --- Utility Functions ---
+        // --- Drag & Drop Functions ---
+        function drag(event) {
+            // Check if the target is a draggable TD element
+            if (event.target.tagName === 'TD' && event.target.getAttribute('draggable') === 'true') {
+                draggedCell = event.target;
+                // Store a small amount of data to satisfy browser requirements
+                event.dataTransfer.setData("text/plain", "drag"); 
+            }
+        }
 
-        function handleCellEdit(cell, targetRoleClass, placeholderText) {
+        function allowDrop(event) {
+            // Check if the drop target is a draggable TD element
+            if (event.target.closest('td[draggable="true"]')) {
+                event.preventDefault(); 
+            }
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            const targetCell = event.target.closest('td[draggable="true"]');
+            
+            // Check for valid drag/drop
+            if (!draggedCell || !targetCell || draggedCell === targetCell) {
+                return;
+            }
+
+            // --- Rule #2: Do not allow drops into Group 1 (Lobby) ---
+            const targetRow = targetCell.parentElement;
+            const targetRowIndex = Array.from(targetCell.closest('tbody').children).indexOf(targetRow);
+            if (targetRowIndex === 0) { // Index 0 is the Group 1/Lobby row
+                return;
+            }
+            
+            // --- FIX: Only swap the inner content, keeping column-based attributes static ---
+            
+            // Store source content
+            const sourceHTML = draggedCell.innerHTML;
+            
+            // Store target content
+            const targetHTML = targetCell.innerHTML;
+            
+            // 1. Update draggedCell (Source) with Target's content
+            draggedCell.innerHTML = targetHTML;
+            
+            // 2. Update targetCell (Destination) with Source's content
+            targetCell.innerHTML = sourceHTML;
+
+            // 3. Update Visual Styles for both cells (handles color and contenteditable)
+            // handleCellEdit now reads the correct, static data-role-class from the cell's location
+            handleCellEdit(draggedCell);
+            handleCellEdit(targetCell);
+            
+            draggedCell = null; // Reset global drag variable
+        }
+        
+        // --- Core Application Logic ---
+
+        function handleCellEdit(cell) {
+            const targetRoleClass = cell.getAttribute('data-role-class');
+            const placeholderText = cell.getAttribute('data-placeholder');
             const content = cell.textContent.trim();
-            const isPlaceholder = content === '' || content === placeholderText;
+            const isPlaceholderContent = content === '' || content === placeholderText;
 
             // 1. Remove all existing role-specific classes
             cell.classList.remove(...ALL_ROLE_CLASSES);
             cell.classList.remove('opacity-50', 'text-center');
 
-            if (isPlaceholder) {
+            if (isPlaceholderContent) {
                 // 2. If content is empty or placeholder, apply empty styling and reset text
                 cell.classList.add('role-empty');
                 cell.classList.add('opacity-50', 'text-center');
                 cell.textContent = placeholderText;
+                cell.setAttribute('contenteditable', 'true');
             } else {
-                // 3. If content is not empty, apply the correct target role class for coloring
+                // 3. If content is a player name, apply the correct target role class for coloring
                 cell.classList.add(targetRoleClass);
                 // Ensure text is trimmed and clean after editing
-                cell.textContent = content; 
+                cell.textContent = content;
+                // Players should not be editable until they are an empty slot again
+                cell.removeAttribute('contenteditable'); 
             }
         }
-
+        
         function parseSignupList(text) {
             // Step 1: Aggressively clean the input text to remove Discord emoji placeholders and non-printing characters.
             let cleanedText = text;
@@ -333,22 +401,30 @@
             const roleClasses = [ROLES['AOE DPS'], ROLES['Healer'], ROLES['Boon Support'], ROLES['DPS'], ROLES['Main Stabs']];
             const placeholderEmpty = '... EMPTY ...';
             const placeholderLobby = 'Lobby';
+            
+            // Common drag/drop attributes
+            const dragDropAttr = ' draggable="true" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)"';
 
             // Loop for the required number of groups
             for (let i = 1; i <= totalGroups; i++) {
                 let rowHtml = `<tr class="bg-gray-700/50 hover:bg-gray-600/50 transition-colors duration-150">`;
 
-                // 1. Group Label
+                // 1. Group Label (Not draggable, not a drop target)
                 rowHtml += `<td class="px-3 py-2 whitespace-nowrap font-medium">Group ${i}</td>`;
 
                 if (i === 1) {
                     // Group 1: Lobby (5 cells)
                     for (let j = 0; j < 5; j++) {
                         const targetRoleClass = roleClasses[j]; 
-                        // Note: Group 1 cells are *always* empty/placeholder, so they are always given the empty styling and contenteditable.
+                        // Note: Group 1 cells are *always* empty/placeholder, so they are always given the empty styling.
+                        // The onblur handler will ensure the cell updates its style correctly if a name is entered.
                         rowHtml += `<td class="px-3 py-2 whitespace-nowrap role-empty opacity-50 text-center" 
                                     contenteditable="true" 
-                                    onblur="handleCellEdit(this, '${targetRoleClass}', '${placeholderLobby}')">
+                                    title="Lobby"
+                                    data-role-class="${targetRoleClass}"
+                                    data-placeholder="${placeholderLobby}"
+                                    ${dragDropAttr}
+                                    onblur="handleCellEdit(this)">
                                     ${placeholderLobby}
                                     </td>`;
                     }
@@ -357,8 +433,9 @@
                     
                     const slots = [];
                     
-                    // Slot 1: Commander (uses role-commander class)
+                    // Slot 1: Commander (uses role-commander class, but is in the AOE DPS column)
                     const commanderPlayer = getNextPlayer(commanderQueue);
+                    // This slot's style is commander color, even though it's the first column
                     slots.push({ player: commanderPlayer, roleClass: ROLES['Commander'], roleName: 'Commander', placeholder: placeholderEmpty });
 
                     // Remaining Slots are standard
@@ -375,10 +452,18 @@
                         // Only make initially empty slots editable
                         const editableAttr = isPlayer 
                             ? ''
-                            : ` contenteditable="true" onblur="handleCellEdit(this, '${targetRoleClass}', '${placeholderEmpty}')"`;
+                            : ` contenteditable="true" onblur="handleCellEdit(this)"`;
+
                         const roleSpecificClasses = isPlayer ? '' : ' opacity-50 text-center';
 
-                        rowHtml += `<td class="px-3 py-2 whitespace-nowrap font-semibold ${emptyClass}${roleSpecificClasses}" title="${slot.roleName}"${editableAttr}>${slot.player}</td>`;
+                        rowHtml += `<td class="px-3 py-2 whitespace-nowrap font-semibold ${emptyClass}${roleSpecificClasses}" 
+                                        title="${slot.roleName}"
+                                        data-role-class="${targetRoleClass}"
+                                        data-placeholder="${slot.placeholder}"
+                                        ${editableAttr}
+                                        ${dragDropAttr}>
+                                        ${slot.player}
+                                    </td>`;
                     });
 
                 } else {
@@ -420,10 +505,17 @@
                         
                         const editableAttr = isPlayer 
                             ? '' 
-                            : ` contenteditable="true" onblur="handleCellEdit(this, '${targetRoleClass}', '${placeholderEmpty}')"`;
+                            : ` contenteditable="true" onblur="handleCellEdit(this)"`;
                         const roleSpecificClasses = isPlayer ? '' : ' opacity-50 text-center';
 
-                        rowHtml += `<td class="px-3 py-2 whitespace-nowrap font-semibold ${emptyClass}${roleSpecificClasses}" title="${slot.roleName}"${editableAttr}>${slot.player}</td>`;
+                        rowHtml += `<td class="px-3 py-2 whitespace-nowrap font-semibold ${emptyClass}${roleSpecificClasses}" 
+                                        title="${slot.roleName}"
+                                        data-role-class="${targetRoleClass}"
+                                        data-placeholder="${slot.placeholder}"
+                                        ${editableAttr}
+                                        ${dragDropAttr}>
+                                        ${slot.player}
+                                    </td>`;
                     });
                 }
 
@@ -480,6 +572,7 @@
         function resetApp() {
             document.getElementById('signup-list').value = '';
             window.currentRoster = null;
+            draggedCell = null;
             document.getElementById('grid-section').classList.add('hidden');
             document.getElementById('input-section').classList.remove('hidden');
             document.getElementById('squad-grid').innerHTML = '';
