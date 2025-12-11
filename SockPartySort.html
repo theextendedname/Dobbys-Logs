@@ -130,9 +130,9 @@
             <div class="mb-4">
                 <label for="participant-count" class="block text-sm font-medium mb-1">Select Total Participants/Groups (Initial):</label>
                 <select id="participant-count" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm rounded-md bg-gray-800 text-white">
-                    <option value="30">30 Participants (7 Groups)</option>
+                    <option value="50" selected>50 Participants (11 Groups)</option>
                     <option value="40">40 Participants (9 Groups)</option>
-                    <option value="50">50 Participants (11 Groups)</option>
+                    <option value="30">30 Participants (7 Groups)</option>
                 </select>
             </div>
             
@@ -153,9 +153,9 @@
                 <div class="flex-grow">
                     <label for="grid-participant-count" class="block text-sm font-medium mb-1">Adjust Visible Groups:</label>
                     <select id="grid-participant-count" onchange="updateGridSize()" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm rounded-md bg-gray-800 text-white">
-                        <option value="30">30 Participants (7 Groups)</option>
+                        <option value="50" selected>50 Participants (11 Groups)</option>
                         <option value="40">40 Participants (9 Groups)</option>
-                        <option value="50">50 Participants (11 Groups)</option>
+                        <option value="30">30 Participants (7 Groups)</option>
                     </select>
                 </div>
                 
@@ -186,6 +186,8 @@
         window.currentRoster = null;
         let draggedCell = null; // Global variable to hold the element being dragged
         const CODE_PREFIX = "SQUAD_LAYOUT_V1:";
+        const EMPTY_PLACEHOLDER = '... EMPTY ...';
+        const COMPRESSION_CODE = '~'; // Single character replacement for EMPTY_PLACEHOLDER
 
         
         // --- Configuration ---
@@ -390,7 +392,7 @@
                     <tbody class="divide-y divide-gray-700">
             `;
 
-            const placeholderEmpty = '... EMPTY ...';
+            const placeholderEmpty = EMPTY_PLACEHOLDER;
             const placeholderLobby = 'Lobby';
             const dragDropAttr = ' draggable="true" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)"';
             const roleClasses = [ROLES['AOE DPS'], ROLES['Healer'], ROLES['Boon Support'], ROLES['DPS'], ROLES['Main Stabs']];
@@ -399,7 +401,7 @@
             let playerIndex = 0; 
             const getNextPlayerFromLayout = () => layoutArray ? layoutArray[playerIndex++] : null;
 
-            // --- BUG FIX: Define queues with 'let' at the function scope to resolve ReferenceError ---
+            // Define queues with 'let' at the function scope
             let commanderQueue = [];
             let healerQueue = [];
             let boonSupportQueue = [];
@@ -439,7 +441,6 @@
 
                 mainStabsQueue = tempRoster['Main Stabs'] || [];
             }
-            // --- END BUG FIX ---
             
             // Loop for the required number of groups
             for (let i = 1; i <= totalGroups; i++) {
@@ -466,7 +467,7 @@
                         slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['DPS'], roleName: 'DPS', placeholder: placeholderEmpty });
                         slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['Main Stabs'], roleName: 'Main Stabs', placeholder: placeholderEmpty });
                     } else {
-                        // Roster-based queue loading - these now correctly reference the function-scoped 'let' variables
+                        // Roster-based queue loading
                         slots.push({ player: getNextPlayer(commanderQueue), roleClass: ROLES['Commander'], roleName: 'Commander', placeholder: placeholderEmpty });
                         slots.push({ player: getNextPlayer(healerQueue), roleClass: ROLES['Healer'], roleName: 'Healer', placeholder: placeholderEmpty });
                         slots.push({ player: getNextPlayer(boonSupportQueue), roleClass: ROLES['Boon Support'], roleName: 'Boon Support', placeholder: placeholderEmpty });
@@ -483,7 +484,7 @@
                         slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['DPS'], roleName: 'DPS', placeholder: placeholderEmpty });
                         slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['Main Stabs'], roleName: 'Main Stabs', placeholder: placeholderEmpty });
                     } else {
-                        // Role-based queue loading - these now correctly reference the function-scoped 'let' variables
+                        // Role-based queue loading
                         slots.push({ player: getNextPlayer(aoeDpsQueue), roleClass: ROLES['AOE DPS'], roleName: 'AOE DPS', placeholder: placeholderEmpty });
                         slots.push({ player: getNextPlayer(healerQueue), roleClass: ROLES['Healer'], roleName: 'Healer', placeholder: placeholderEmpty });
 
@@ -551,8 +552,14 @@
 
             const playerContents = [];
             cells.forEach(cell => {
-                // Use innerText to get the visible content, then trim
-                playerContents.push(cell.innerText.trim());
+                let content = cell.innerText.trim();
+                
+                // --- COMPRESSION: Replace long placeholder with single character ---
+                if (content === EMPTY_PLACEHOLDER) {
+                    content = COMPRESSION_CODE; 
+                }
+                
+                playerContents.push(content);
             });
             
             // Format: [size]|[player1]|[player2]|...
@@ -617,7 +624,9 @@
                     // Data format: [size]|[player1]|[player2]|...
                     const parts = decodedData.split('|');
                     const savedSize = parts[0];
-                    const layoutArray = parts.slice(1);
+                    
+                    // --- DECOMPRESSION: Replace compression code with full placeholder ---
+                    const layoutArray = parts.slice(1).map(item => item === COMPRESSION_CODE ? EMPTY_PLACEHOLDER : item);
                     
                     // Synchronize dropdowns and get total groups
                     const gridCountSelect = document.getElementById('grid-participant-count');
