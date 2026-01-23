@@ -86,7 +86,6 @@
             margin-top: 1rem;
         }
         
-        /* Collapsible Styling */
         summary {
             list-style: none;
             cursor: pointer;
@@ -94,17 +93,13 @@
             justify-content: space-between;
             align-items: center;
         }
-        summary::-webkit-details-marker {
-            display: none;
-        }
+        summary::-webkit-details-marker { display: none; }
         summary::after {
             content: '▶';
             font-size: 0.8rem;
             transition: transform 0.2s;
         }
-        details[open] summary::after {
-            transform: rotate(90deg);
-        }
+        details[open] summary::after { transform: rotate(90deg); }
     </style>
 </head>
 <body class="p-6 min-h-screen">
@@ -181,7 +176,7 @@
                                 </tr>
                             </thead>
                             <tbody id="mapping-tbody" class="divide-y divide-gray-700">
-                                </tbody>
+                            </tbody>
                         </table>
                     </div>
                     
@@ -194,7 +189,6 @@
     </div>
 
     <script>
-        // --- Globals ---
         window.currentRoster = null;
         window.customRoleMappings = {};
         let draggedCell = null;
@@ -208,15 +202,12 @@
             'Boon Support': 'role-boon-support',
             'DPS': 'role-dps',
             'Main Stabs': 'role-main-stabs',
-            'Commander': 'role-commander',
-            'Support Spellbreaker': 'role-boon-support'
+            'Commander': 'role-commander'
         };
 
         const GROUP_CONFIGS = { '30': 7, '40': 9, '50': 11 };
         const SPELLBREAKER_GROUPS = [3, 5];
         const ALL_ROLE_CLASSES = Object.values(ROLES).concat(['role-empty']);
-
-        // --- Core Functions ---
 
         function processList() {
             const signupText = document.getElementById('signup-list').value.trim();
@@ -247,13 +238,12 @@
                 let defaultVal = "DPS"; 
                 const lowRole = role.toLowerCase();
                 
-                // Rules prioritised to catch specific "Boon Strips" before general "Boon"
                 if (role.startsWith("Participants")) defaultVal = "IGNORE";
                 else if (lowRole.includes('commander')) defaultVal = "Commander";
                 else if (lowRole.includes('healer')) defaultVal = "Healer";
                 else if (lowRole.includes('strip') || lowRole.includes('pull') || lowRole.includes('aoe')) defaultVal = "AOE DPS";
-                else if (lowRole.includes('boon') || lowRole.includes('harb') || lowRole.includes('secondary')) defaultVal = "Boon Support";
-                else if (lowRole.includes('spellbreaker')) defaultVal = "Support Spellbreaker";
+                // Both standard boons and spellbreakers now map to Boon Support column
+                else if (lowRole.includes('boon') || lowRole.includes('harb') || lowRole.includes('secondary') || lowRole.includes('spellbreaker')) defaultVal = "Boon Support";
                 else if (lowRole.includes('stab')) defaultVal = "Main Stabs";
 
                 window.customRoleMappings[role] = defaultVal;
@@ -277,7 +267,6 @@
                             <option value="DPS" ${currentAssigned === "DPS" ? 'selected' : ''}>DPS</option>
                             <option value="Main Stabs" ${currentAssigned === "Main Stabs" ? 'selected' : ''}>Main Stabs</option>
                             <option value="Commander" ${currentAssigned === "Commander" ? 'selected' : ''}>Commander</option>
-                            <option value="Support Spellbreaker" ${currentAssigned === "Support Spellbreaker" ? 'selected' : ''}>Support Spellbreaker</option>
                             <option value="IGNORE" ${currentAssigned === "IGNORE" ? 'selected' : ''}>❌ Ignore this Role</option>
                         </select>
                     </td>
@@ -295,7 +284,6 @@
 
             const selectedCount = document.getElementById('grid-participant-count').value;
             buildSquadGrid(GROUP_CONFIGS[selectedCount], window.currentRoster, null);
-            
             document.getElementById('squad-grid').scrollIntoView({ behavior: 'smooth' });
         }
 
@@ -323,13 +311,20 @@
                 Object.keys(roster).forEach(signupRole => {
                     const target = window.customRoleMappings[signupRole];
                     const players = [...roster[signupRole]];
+                    
                     if (target === "Commander") commQ.push(...players);
                     else if (target === "Healer") healQ.push(...players);
-                    else if (target === "Boon Support") boonQ.push(...players);
-                    else if (target === "Support Spellbreaker") sbQ.push(...players);
                     else if (target === "DPS") dpsQ.push(...players);
                     else if (target === "AOE DPS") aoeQ.push(...players);
                     else if (target === "Main Stabs") stabQ.push(...players);
+                    else if (target === "Boon Support") {
+                        // Internal check: If it was a spellbreaker signup, put in the special queue
+                        if (signupRole.toLowerCase().includes('spellbreaker')) {
+                            sbQ.push(...players);
+                        } else {
+                            boonQ.push(...players);
+                        }
+                    }
                 });
             }
 
@@ -341,25 +336,26 @@
                 html += `<td class="px-3 py-2 font-medium">Group ${i}</td>`;
                 
                 let slots = [];
-                if (i === 1) { // Lobby
-                    for (let j = 0; j < 5; j++) slots.push({ p: layoutArray ? getLayoutP() : 'Lobby', c: 'role-empty', name: 'Lobby' });
-                } else if (i === 2) { // Commander Group
-                    slots.push({ p: layoutArray ? getLayoutP() : getNext(commQ), c: ROLES['Commander'], name: 'Commander' });
-                    slots.push({ p: layoutArray ? getLayoutP() : getNext(healQ), c: ROLES['Healer'], name: 'Healer' });
-                    slots.push({ p: layoutArray ? getLayoutP() : getNext(boonQ), c: ROLES['Boon Support'], name: 'Boon Support' });
-                    slots.push({ p: layoutArray ? getLayoutP() : getNext(dpsQ), c: ROLES['DPS'], name: 'DPS' });
-                    slots.push({ p: layoutArray ? getLayoutP() : getNext(stabQ), c: ROLES['Main Stabs'], name: 'Main Stabs' });
-                } else { // Regular Groups
-                    slots.push({ p: layoutArray ? getLayoutP() : getNext(aoeQ), c: ROLES['AOE DPS'], name: 'AOE DPS' });
-                    slots.push({ p: layoutArray ? getLayoutP() : getNext(healQ), c: ROLES['Healer'], name: 'Healer' });
+                if (i === 1) { 
+                    for (let j = 0; j < 5; j++) slots.push({ p: layoutArray ? getLayoutP() : 'Lobby', c: 'role-empty' });
+                } else if (i === 2) { 
+                    slots.push({ p: layoutArray ? getLayoutP() : getNext(commQ), c: ROLES['Commander'] });
+                    slots.push({ p: layoutArray ? getLayoutP() : getNext(healQ), c: ROLES['Healer'] });
+                    slots.push({ p: layoutArray ? getLayoutP() : getNext(boonQ), c: ROLES['Boon Support'] });
+                    slots.push({ p: layoutArray ? getLayoutP() : getNext(dpsQ), c: ROLES['DPS'] });
+                    slots.push({ p: layoutArray ? getLayoutP() : getNext(stabQ), c: ROLES['Main Stabs'] });
+                } else { 
+                    slots.push({ p: layoutArray ? getLayoutP() : getNext(aoeQ), c: ROLES['AOE DPS'] });
+                    slots.push({ p: layoutArray ? getLayoutP() : getNext(healQ), c: ROLES['Healer'] });
                     
-                    let p, c = ROLES['Boon Support'];
+                    // Placement logic for Spellbreakers
+                    let p;
                     if (!layoutArray && SPELLBREAKER_GROUPS.includes(i) && sbQ.length > 0) p = getNext(sbQ);
-                    else p = layoutArray ? getLayoutP() : getNext(boonQ);
-                    slots.push({ p, c, name: 'Boon Support / SB' });
-
-                    slots.push({ p: layoutArray ? getLayoutP() : getNext(dpsQ), c: ROLES['DPS'], name: 'DPS' });
-                    slots.push({ p: layoutArray ? getLayoutP() : getNext(stabQ), c: ROLES['Main Stabs'], name: 'Main Stabs' });
+                    else p = layoutArray ? getLayoutP() : (boonQ.length > 0 ? getNext(boonQ) : getNext(sbQ));
+                    
+                    slots.push({ p, c: ROLES['Boon Support'] });
+                    slots.push({ p: layoutArray ? getLayoutP() : getNext(dpsQ), c: ROLES['DPS'] });
+                    slots.push({ p: layoutArray ? getLayoutP() : getNext(stabQ), c: ROLES['Main Stabs'] });
                 }
 
                 slots.forEach(slot => {
@@ -382,10 +378,8 @@
                 const parts = decodedData.split('|');
                 const savedSize = parts[0];
                 const layoutArray = parts.slice(1).map(item => item === COMPRESSION_CODE ? EMPTY_PLACEHOLDER : item);
-                
                 document.getElementById('grid-participant-count').value = savedSize;
                 buildSquadGrid(GROUP_CONFIGS[savedSize], null, layoutArray);
-                
                 window.currentRoster = { isLayout: true, size: savedSize, layout: layoutArray };
                 document.getElementById('input-section').classList.add('hidden');
                 document.getElementById('grid-section').classList.remove('hidden');
