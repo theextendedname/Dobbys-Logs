@@ -347,7 +347,7 @@ function parseSignupList(text) {
 
 function buildSquadGrid(totalGroups, roster = null, layoutArray = null) {
     const gridContainer = document.getElementById('squad-grid');
-    gridContainer.innerHTML = ''; // Clear previous grid 
+    gridContainer.innerHTML = ''; // Clear previous grid
 
     let html = `
         <table class="min-w-full divide-y divide-gray-600 rounded-lg overflow-hidden shadow-2xl">
@@ -374,36 +374,40 @@ function buildSquadGrid(totalGroups, roster = null, layoutArray = null) {
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-700">
-    `; [cite: 2]
+    `; 
 
-    const placeholderEmpty = EMPTY_PLACEHOLDER; [cite: 2]
-    const placeholderLobby = 'Lobby'; [cite: 2]
-    const dragDropAttr = ' draggable="true" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)"'; [cite: 2]
-    const roleClasses = [ROLES['AOE DPS'], ROLES['Healer'], ROLES['Boon Support'], ROLES['DPS'], ROLES['Main Stabs']]; [cite: 2]
+const placeholderEmpty = EMPTY_PLACEHOLDER;
+    const placeholderLobby = 'Lobby';
+    const dragDropAttr = ' draggable="true" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)"';
+    const roleClasses = [ROLES['AOE DPS'], ROLES['Healer'], ROLES['Boon Support'], ROLES['DPS'], ROLES['Main Stabs']];
 
+    // If a layout array is provided, use it to get players sequentially
     let playerIndex = 0; 
-    const getNextPlayerFromLayout = () => layoutArray ? layoutArray[playerIndex++] : null; [cite: 2]
+    const getNextPlayerFromLayout = () => layoutArray ? layoutArray[playerIndex++] : null;
 
+    // Define queues for role-based distribution
     let commanderQueue = [];
     let healerQueue = [];
     let boonSupportQueue = [];
     let supportSpellbreakerQueue = [];
     let dpsQueue = [];
     let aoeDpsQueue = [];
-    let mainStabsQueue = []; [cite: 2]
+    let mainStabsQueue = [];
 
-    const getNextPlayer = (queue) => queue.shift() || placeholderEmpty; [cite: 2]
+    // Helper to dequeue a player or provide placeholder
+    const getNextPlayer = (queue) => queue.shift() || placeholderEmpty;
 
     if (!layoutArray && roster) {
-        const tempRoster = JSON.parse(JSON.stringify(roster)); [cite: 2]
+        // Deep copy roster to avoid mutating state
+        const tempRoster = JSON.parse(JSON.stringify(roster));
         
-        commanderQueue = tempRoster['Commander'] || []; [cite: 2]
+        commanderQueue = tempRoster['Commander'] || [];
         
         // MAPPING: Healers
         const mainHealerQueue = tempRoster['Main Healer'] || [];
-        healerQueue = (tempRoster['Healer'] || []).concat(mainHealerQueue); [cite: 2]
+        healerQueue = (tempRoster['Healer'] || []).concat(mainHealerQueue);
         
-        // IMPROVED MAPPING: Boon Support (Includes 'Harb', 'Secondary', etc.)
+        // DYNAMIC MAPPING: Boon Support (Includes 'Harb', 'Secondary', etc.)
         boonSupportQueue = Object.keys(tempRoster)
             .filter(role => (role.includes('Boon Support') || role === 'Secondary Support') && role !== 'Support Spellbreaker')
             .flatMap(role => tempRoster[role]);
@@ -411,31 +415,34 @@ function buildSquadGrid(totalGroups, roster = null, layoutArray = null) {
         supportSpellbreakerQueue = tempRoster['Support Spellbreaker'] || [];
         dpsQueue = tempRoster['DPS'] || [];
         
-        // IMPROVED MAPPING: AOE DPS / Strips
+        // DYNAMIC MAPPING: AOE DPS & Boon Strips
         const boonStripsAndPullsQueue = tempRoster['Boon Strips & Pulls'] || [];
         aoeDpsQueue = Object.keys(tempRoster)
             .filter(role => role.includes('AOE DPS'))
             .flatMap(role => tempRoster[role])
             .concat(boonStripsAndPullsQueue);
 
-        mainStabsQueue = tempRoster['Main Stabs'] || []; [cite: 2]
+        mainStabsQueue = tempRoster['Main Stabs'] || [];
     }
     
+    // Loop for the required number of groups
     for (let i = 1; i <= totalGroups; i++) {
         let rowHtml = `<tr class="bg-gray-700/50 hover:bg-gray-600/50 transition-colors duration-150">`;
 
-        rowHtml += `<td class="px-3 py-2 whitespace-nowrap font-medium">Group ${i}</td>`; [cite: 2]
+        // 1. Group Label
+        rowHtml += `<td class="px-3 py-2 whitespace-nowrap font-medium">Group ${i}</td>`;
         
+        // Define the structure for this row (5 slots)
         const slots = [];
 
         if (i === 1) {
-            // Group 1: Lobby
+            // Group 1: Lobby (5 cells, always lobby placeholder)
             for (let j = 0; j < 5; j++) {
                 const playerContent = layoutArray ? getNextPlayerFromLayout() : placeholderLobby;
                 slots.push({ player: playerContent, roleClass: roleClasses[j], roleName: 'Lobby Slot', placeholder: placeholderLobby, isLobby: true });
-            } [cite: 2]
+            }
         } else if (i === 2) {
-            // Group 2: Commander slot
+            // Group 2: Commander slot and standard roles
             if (layoutArray) {
                 slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['Commander'], roleName: 'Commander', placeholder: placeholderEmpty });
                 slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['Healer'], roleName: 'Healer', placeholder: placeholderEmpty });
@@ -448,7 +455,7 @@ function buildSquadGrid(totalGroups, roster = null, layoutArray = null) {
                 slots.push({ player: getNextPlayer(boonSupportQueue), roleClass: ROLES['Boon Support'], roleName: 'Boon Support', placeholder: placeholderEmpty });
                 slots.push({ player: getNextPlayer(dpsQueue), roleClass: ROLES['DPS'], roleName: 'DPS', placeholder: placeholderEmpty });
                 slots.push({ player: getNextPlayer(mainStabsQueue), roleClass: ROLES['Main Stabs'], roleName: 'Main Stabs', placeholder: placeholderEmpty });
-            } [cite: 2]
+            }
         } else {
             // Groups 3+ (Standard or Spellbreaker variation)
             if (layoutArray) {
@@ -476,15 +483,19 @@ function buildSquadGrid(totalGroups, roster = null, layoutArray = null) {
 
                 slots.push({ player: getNextPlayer(dpsQueue), roleClass: ROLES['DPS'], roleName: 'DPS', placeholder: placeholderEmpty });
                 slots.push({ player: getNextPlayer(mainStabsQueue), roleClass: ROLES['Main Stabs'], roleName: 'Main Stabs', placeholder: placeholderEmpty });
-            } [cite: 2]
+            }
         }
         
+        // Render the cells
         slots.forEach(slot => {
-            const isPlayer = !slot.player.includes('EMPTY') && !slot.isLobby; [cite: 2]
-            const cellStyleClass = isPlayer ? slot.roleClass : 'role-empty'; [cite: 2]
+            const isPlayer = !slot.player.includes('EMPTY') && !slot.isLobby;
+            const cellStyleClass = isPlayer ? slot.roleClass : 'role-empty';
             const targetRoleClass = slot.roleClass; 
-            const editableAttr = isPlayer ? '' : ` contenteditable="true" onblur="handleCellEdit(this)"`; [cite: 2]
-            const roleSpecificClasses = isPlayer ? '' : ' opacity-50 text-center'; [cite: 2]
+            
+            const editableAttr = isPlayer 
+                ? '' 
+                : ` contenteditable="true" onblur="handleCellEdit(this)"`;
+            const roleSpecificClasses = isPlayer ? '' : ' opacity-50 text-center';
 
             rowHtml += `<td class="px-3 py-2 whitespace-nowrap font-semibold ${cellStyleClass}${roleSpecificClasses}" 
                             title="${slot.roleName}"
@@ -493,18 +504,18 @@ function buildSquadGrid(totalGroups, roster = null, layoutArray = null) {
                             ${editableAttr}
                             ${dragDropAttr}>
                             ${slot.player}
-                        </td>`; [cite: 2]
+                        </td>`;
         });
 
-        rowHtml += `</tr>`; [cite: 2]
-        html += rowHtml; [cite: 2]
+        rowHtml += `</tr>`;
+        html += rowHtml;
     }
 
     html += `
             </tbody>
         </table>
-    `; [cite: 2]
-    gridContainer.innerHTML = html; [cite: 2]
+    `;
+    gridContainer.innerHTML = html;
 }
 
         function createLayoutCode() {
