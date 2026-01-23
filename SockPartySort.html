@@ -136,11 +136,12 @@
             </div>
             
             <button onclick="applyMappingsAndGenerate()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded transition">
-                Generate Squad Grid
+                Apply Mappings & Generate Squad
             </button>
         </div>
 
         <div id="grid-section" class="hidden mt-8">
+            <h2 class="text-2xl font-semibold mb-4 text-center">3. Proposed Squad Composition</h2>
             <div class="flex flex-col sm:flex-row gap-4 mb-4">
                 <div class="flex-grow">
                     <label class="block text-sm font-medium mb-1">Adjust Visible Groups:</label>
@@ -162,7 +163,7 @@
             <div id="squad-grid" class="overflow-x-auto"></div>
             
             <button onclick="resetApp()" class="mt-6 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition">
-                Reset / Start Over
+                Reset / Enter New List
             </button>
         </div>
     </div>
@@ -196,11 +197,13 @@
             const signupText = document.getElementById('signup-list').value.trim();
             if (!signupText) return alert('Please paste a list or layout code.');
 
+            // Handle direct layout code load
             if (signupText.startsWith(CODE_PREFIX)) {
-                handleLayoutCode(signupText);
+                handleLayoutCodeLoad(signupText);
                 return;
             }
 
+            // Parse fresh list and show mapping UI
             const roster = parseSignupList(signupText);
             window.currentRoster = roster;
             showMappingUI(roster);
@@ -214,20 +217,22 @@
             foundRoles.forEach(role => {
                 const row = document.createElement('tr');
                 
-                // Smart Logic Defaults
+                // --- Smart Logic Defaults ---
                 let defaultVal = "DPS"; 
                 const lowRole = role.toLowerCase();
-                if (lowRole.includes('commander')) defaultVal = "Commander";
-                if (lowRole.includes('healer')) defaultVal = "Healer";
-                if (lowRole.includes('boon') || lowRole.includes('harb') || lowRole.includes('secondary')) defaultVal = "Boon Support";
-                if (lowRole.includes('spellbreaker')) defaultVal = "Support Spellbreaker";
-                if (lowRole.includes('aoe') || lowRole.includes('strip')) defaultVal = "AOE DPS";
-                if (lowRole.includes('stab')) defaultVal = "Main Stabs";
+                
+                if (role.startsWith("Participants")) defaultVal = "IGNORE";
+                else if (lowRole.includes('commander')) defaultVal = "Commander";
+                else if (lowRole.includes('healer')) defaultVal = "Healer";
+                else if (lowRole.includes('boon') || lowRole.includes('harb') || lowRole.includes('secondary')) defaultVal = "Boon Support";
+                else if (lowRole.includes('spellbreaker')) defaultVal = "Support Spellbreaker";
+                else if (lowRole.includes('aoe') || lowRole.includes('strip')) defaultVal = "AOE DPS";
+                else if (lowRole.includes('stab')) defaultVal = "Main Stabs";
 
                 row.innerHTML = `
                     <td class="px-4 py-3 font-medium text-gray-200">${role}</td>
                     <td class="px-4 py-3">
-                        <select data-signup-role="${role}" class="bg-gray-800 text-white rounded p-2 border border-gray-600 w-full">
+                        <select data-signup-role="${role}" class="bg-gray-800 text-white rounded p-2 border border-gray-600 w-full focus:ring-yellow-500">
                             <option value="AOE DPS" ${defaultVal === "AOE DPS" ? 'selected' : ''}>AOE DPS</option>
                             <option value="Healer" ${defaultVal === "Healer" ? 'selected' : ''}>Healer</option>
                             <option value="Boon Support" ${defaultVal === "Boon Support" ? 'selected' : ''}>Boon Support</option>
@@ -235,7 +240,7 @@
                             <option value="Main Stabs" ${defaultVal === "Main Stabs" ? 'selected' : ''}>Main Stabs</option>
                             <option value="Commander" ${defaultVal === "Commander" ? 'selected' : ''}>Commander</option>
                             <option value="Support Spellbreaker" ${defaultVal === "Support Spellbreaker" ? 'selected' : ''}>Support Spellbreaker</option>
-                            <option value="IGNORE">❌ Ignore</option>
+                            <option value="IGNORE" ${defaultVal === "IGNORE" ? 'selected' : ''}>❌ Ignore this Role</option>
                         </select>
                     </td>
                 `;
@@ -249,6 +254,7 @@
         function applyMappingsAndGenerate() {
             const selects = document.querySelectorAll('#mapping-tbody select');
             window.customRoleMappings = {};
+            
             selects.forEach(sel => {
                 window.customRoleMappings[sel.getAttribute('data-signup-role')] = sel.value;
             });
@@ -257,8 +263,26 @@
             document.getElementById('grid-participant-count').value = selectedCount;
 
             buildSquadGrid(GROUP_CONFIGS[selectedCount], window.currentRoster, null);
+
             document.getElementById('mapping-section').classList.add('hidden');
             document.getElementById('grid-section').classList.remove('hidden');
+        }
+
+        function handleLayoutCodeLoad(signupText) {
+             try {
+                const encoded = signupText.substring(CODE_PREFIX.length);
+                const decodedData = atob(encoded);
+                const parts = decodedData.split('|');
+                const savedSize = parts[0];
+                const layoutArray = parts.slice(1).map(item => item === COMPRESSION_CODE ? EMPTY_PLACEHOLDER : item);
+                
+                document.getElementById('grid-participant-count').value = savedSize;
+                buildSquadGrid(GROUP_CONFIGS[savedSize], null, layoutArray);
+                
+                window.currentRoster = { isLayout: true, size: savedSize, layout: layoutArray };
+                document.getElementById('input-section').classList.add('hidden');
+                document.getElementById('grid-section').classList.remove('hidden');
+            } catch (e) { alert("Invalid layout code."); }
         }
 
         function buildSquadGrid(totalGroups, roster = null, layoutArray = null) {
@@ -278,25 +302,25 @@
                 </thead>
                 <tbody class="divide-y divide-gray-700">`;
 
-            let commanderQueue = [], healerQueue = [], boonSupportQueue = [], spellbreakerQueue = [], dpsQueue = [], aoeDpsQueue = [], stabsQueue = [];
+            let commQ = [], healQ = [], boonQ = [], sbQ = [], dpsQ = [], aoeQ = [], stabQ = [];
             const getNext = (q) => q.shift() || EMPTY_PLACEHOLDER;
 
             if (!layoutArray && roster) {
-                Object.keys(roster).forEach(role => {
-                    const target = window.customRoleMappings[role];
-                    const players = [...roster[role]];
-                    if (target === "Commander") commanderQueue.push(...players);
-                    else if (target === "Healer") healerQueue.push(...players);
-                    else if (target === "Boon Support") boonSupportQueue.push(...players);
-                    else if (target === "Support Spellbreaker") spellbreakerQueue.push(...players);
-                    else if (target === "DPS") dpsQueue.push(...players);
-                    else if (target === "AOE DPS") aoeDpsQueue.push(...players);
-                    else if (target === "Main Stabs") stabsQueue.push(...players);
+                Object.keys(roster).forEach(signupRole => {
+                    const target = window.customRoleMappings[signupRole];
+                    const players = [...roster[signupRole]];
+                    if (target === "Commander") commQ.push(...players);
+                    else if (target === "Healer") healQ.push(...players);
+                    else if (target === "Boon Support") boonQ.push(...players);
+                    else if (target === "Support Spellbreaker") sbQ.push(...players);
+                    else if (target === "DPS") dpsQ.push(...players);
+                    else if (target === "AOE DPS") aoeQ.push(...players);
+                    else if (target === "Main Stabs") stabQ.push(...players);
                 });
             }
 
-            let playerIdx = 0;
-            const getLayoutPlayer = () => layoutArray[playerIdx++];
+            let pIdx = 0;
+            const getLayoutP = () => layoutArray[pIdx++];
 
             for (let i = 1; i <= totalGroups; i++) {
                 html += `<tr class="bg-gray-700/50 hover:bg-gray-600/50">`;
@@ -304,24 +328,24 @@
                 
                 let slots = [];
                 if (i === 1) { // Lobby
-                    for (let j = 0; j < 5; j++) slots.push({ p: layoutArray ? getLayoutPlayer() : 'Lobby', c: 'role-empty', name: 'Lobby' });
+                    for (let j = 0; j < 5; j++) slots.push({ p: layoutArray ? getLayoutP() : 'Lobby', c: 'role-empty', name: 'Lobby' });
                 } else if (i === 2) { // Commander Group
-                    slots.push({ p: layoutArray ? getLayoutPlayer() : getNext(commanderQueue), c: ROLES['Commander'], name: 'Commander' });
-                    slots.push({ p: layoutArray ? getLayoutPlayer() : getNext(healerQueue), c: ROLES['Healer'], name: 'Healer' });
-                    slots.push({ p: layoutArray ? getLayoutPlayer() : getNext(boonSupportQueue), c: ROLES['Boon Support'], name: 'Boon Support' });
-                    slots.push({ p: layoutArray ? getLayoutPlayer() : getNext(dpsQueue), c: ROLES['DPS'], name: 'DPS' });
-                    slots.push({ p: layoutArray ? getLayoutPlayer() : getNext(stabsQueue), c: ROLES['Main Stabs'], name: 'Main Stabs' });
+                    slots.push({ p: layoutArray ? getLayoutP() : getNext(commQ), c: ROLES['Commander'], name: 'Commander' });
+                    slots.push({ p: layoutArray ? getLayoutP() : getNext(healQ), c: ROLES['Healer'], name: 'Healer' });
+                    slots.push({ p: layoutArray ? getLayoutP() : getNext(boonQ), c: ROLES['Boon Support'], name: 'Boon Support' });
+                    slots.push({ p: layoutArray ? getLayoutP() : getNext(dpsQ), c: ROLES['DPS'], name: 'DPS' });
+                    slots.push({ p: layoutArray ? getLayoutP() : getNext(stabQ), c: ROLES['Main Stabs'], name: 'Main Stabs' });
                 } else { // Regular Groups
-                    slots.push({ p: layoutArray ? getLayoutPlayer() : getNext(aoeDpsQueue), c: ROLES['AOE DPS'], name: 'AOE DPS' });
-                    slots.push({ p: layoutArray ? getLayoutPlayer() : getNext(healerQueue), c: ROLES['Healer'], name: 'Healer' });
+                    slots.push({ p: layoutArray ? getLayoutP() : getNext(aoeQ), c: ROLES['AOE DPS'], name: 'AOE DPS' });
+                    slots.push({ p: layoutArray ? getLayoutP() : getNext(healQ), c: ROLES['Healer'], name: 'Healer' });
                     
                     let p, c = ROLES['Boon Support'];
-                    if (!layoutArray && SPELLBREAKER_GROUPS.includes(i) && spellbreakerQueue.length > 0) p = getNext(spellbreakerQueue);
-                    else p = layoutArray ? getLayoutPlayer() : getNext(boonSupportQueue);
+                    if (!layoutArray && SPELLBREAKER_GROUPS.includes(i) && sbQ.length > 0) p = getNext(sbQ);
+                    else p = layoutArray ? getLayoutP() : getNext(boonQ);
                     slots.push({ p, c, name: 'Boon Support / SB' });
 
-                    slots.push({ p: layoutArray ? getLayoutPlayer() : getNext(dpsQueue), c: ROLES['DPS'], name: 'DPS' });
-                    slots.push({ p: layoutArray ? getLayoutPlayer() : getNext(stabsQueue), c: ROLES['Main Stabs'], name: 'Main Stabs' });
+                    slots.push({ p: layoutArray ? getLayoutP() : getNext(dpsQ), c: ROLES['DPS'], name: 'DPS' });
+                    slots.push({ p: layoutArray ? getLayoutP() : getNext(stabQ), c: ROLES['Main Stabs'], name: 'Main Stabs' });
                 }
 
                 slots.forEach(slot => {
@@ -336,8 +360,6 @@
             }
             gridContainer.innerHTML = html + `</tbody></table>`;
         }
-
-        // --- Standard Helpers (Preserved) ---
 
         function parseSignupList(text) {
             let cleaned = text.replace(/:\w+:\s*/g, ' ').replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
@@ -396,8 +418,14 @@
             navigator.clipboard.writeText(encoded);
         }
 
+        function updateGridSize() {
+            if (!window.currentRoster || window.currentRoster.isLayout) return;
+            const count = document.getElementById('grid-participant-count').value;
+            buildSquadGrid(GROUP_CONFIGS[count], window.currentRoster, null);
+        }
+
         function resetApp() {
-            location.reload(); // Simplest way to clear everything
+            location.reload();
         }
 
         function toggleTheme() {
