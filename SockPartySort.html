@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -114,34 +115,12 @@
             </div>
 
             <button onclick="processList()" class="w-full kpi-card hover:bg-yellow-600 text-white font-bold py-3 px-4 rounded transition">
-                Analyze Roles
-            </button>
-        </div>
-
-        <div id="mapping-section" class="hidden mt-8 bg-gray-700/50 p-6 rounded-lg shadow-xl border border-gray-600">
-            <h2 class="text-2xl font-semibold mb-2">2. Verify Role Mappings</h2>
-            <p class="text-sm text-gray-300 mb-4">Confirm which squad column these sign-up headers belong to:</p>
-            
-            <div class="overflow-x-auto">
-                <table class="min-w-full mb-6">
-                    <thead class="bg-gray-800">
-                        <tr class="text-left">
-                            <th class="px-4 py-3 text-xs font-medium uppercase tracking-wider">Role Found in Sign-up</th>
-                            <th class="px-4 py-3 text-xs font-medium uppercase tracking-wider">Maps to Squad Column</th>
-                        </tr>
-                    </thead>
-                    <tbody id="mapping-tbody" class="divide-y divide-gray-600">
-                        </tbody>
-                </table>
-            </div>
-            
-            <button onclick="applyMappingsAndGenerate()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded transition">
-                Apply Mappings & Generate Squad
+                Generate Squad Grid
             </button>
         </div>
 
         <div id="grid-section" class="hidden mt-8">
-            <h2 class="text-2xl font-semibold mb-4 text-center">3. Proposed Squad Composition</h2>
+            <h2 class="text-2xl font-semibold mb-4 text-center">2. Proposed Squad Composition</h2>
             <div class="flex flex-col sm:flex-row gap-4 mb-4">
                 <div class="flex-grow">
                     <label class="block text-sm font-medium mb-1">Adjust Visible Groups:</label>
@@ -165,6 +144,28 @@
             <button onclick="resetApp()" class="mt-6 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition">
                 Reset / Enter New List
             </button>
+
+            <div id="mapping-adjustment-ui" class="mt-12 bg-gray-800/50 p-6 rounded-lg shadow-xl border border-gray-600">
+                <h3 class="text-xl font-semibold mb-2">Role Mapping Adjustments</h3>
+                <p class="text-sm text-gray-400 mb-4">The headers below were detected in your list. Change their mappings here to rebuild the squad.</p>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full mb-6">
+                        <thead class="bg-gray-900">
+                            <tr class="text-left">
+                                <th class="px-4 py-3 text-xs font-medium uppercase tracking-wider">Detected Header</th>
+                                <th class="px-4 py-3 text-xs font-medium uppercase tracking-wider">Assigned Column</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mapping-tbody" class="divide-y divide-gray-700">
+                            </tbody>
+                    </table>
+                </div>
+                
+                <button onclick="applyMappingsAndGenerate()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded transition">
+                    Update Squad Composition
+                </button>
+            </div>
         </div>
     </div>
 
@@ -197,27 +198,34 @@
             const signupText = document.getElementById('signup-list').value.trim();
             if (!signupText) return alert('Please paste a list or layout code.');
 
-            // Handle direct layout code load
             if (signupText.startsWith(CODE_PREFIX)) {
                 handleLayoutCodeLoad(signupText);
                 return;
             }
 
-            // Parse fresh list and show mapping UI
+            // 1. Parse roster
             const roster = parseSignupList(signupText);
             window.currentRoster = roster;
-            showMappingUI(roster);
+
+            // 2. Generate and set default mappings automatically
+            generateDefaultMappings(roster);
+
+            // 3. Populate the adjustment UI at the bottom
+            populateMappingUI(roster);
+
+            // 4. Build grid immediately
+            const selectedCount = document.getElementById('participant-count').value;
+            document.getElementById('grid-participant-count').value = selectedCount;
+            buildSquadGrid(GROUP_CONFIGS[selectedCount], roster, null);
+
+            // 5. Swap visibility
+            document.getElementById('input-section').classList.add('hidden');
+            document.getElementById('grid-section').classList.remove('hidden');
         }
 
-        function showMappingUI(roster) {
-            const mappingTbody = document.getElementById('mapping-tbody');
-            mappingTbody.innerHTML = '';
-            const foundRoles = Object.keys(roster);
-
-            foundRoles.forEach(role => {
-                const row = document.createElement('tr');
-                
-                // --- Smart Logic Defaults ---
+        function generateDefaultMappings(roster) {
+            window.customRoleMappings = {};
+            Object.keys(roster).forEach(role => {
                 let defaultVal = "DPS"; 
                 const lowRole = role.toLowerCase();
                 
@@ -229,60 +237,48 @@
                 else if (lowRole.includes('aoe') || lowRole.includes('strip')) defaultVal = "AOE DPS";
                 else if (lowRole.includes('stab')) defaultVal = "Main Stabs";
 
+                window.customRoleMappings[role] = defaultVal;
+            });
+        }
+
+        function populateMappingUI(roster) {
+            const mappingTbody = document.getElementById('mapping-tbody');
+            mappingTbody.innerHTML = '';
+            
+            Object.keys(roster).forEach(role => {
+                const currentAssigned = window.customRoleMappings[role];
+                const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="px-4 py-3 font-medium text-gray-200">${role}</td>
                     <td class="px-4 py-3">
-                        <select data-signup-role="${role}" class="bg-gray-800 text-white rounded p-2 border border-gray-600 w-full focus:ring-yellow-500">
-                            <option value="AOE DPS" ${defaultVal === "AOE DPS" ? 'selected' : ''}>AOE DPS</option>
-                            <option value="Healer" ${defaultVal === "Healer" ? 'selected' : ''}>Healer</option>
-                            <option value="Boon Support" ${defaultVal === "Boon Support" ? 'selected' : ''}>Boon Support</option>
-                            <option value="DPS" ${defaultVal === "DPS" ? 'selected' : ''}>DPS</option>
-                            <option value="Main Stabs" ${defaultVal === "Main Stabs" ? 'selected' : ''}>Main Stabs</option>
-                            <option value="Commander" ${defaultVal === "Commander" ? 'selected' : ''}>Commander</option>
-                            <option value="Support Spellbreaker" ${defaultVal === "Support Spellbreaker" ? 'selected' : ''}>Support Spellbreaker</option>
-                            <option value="IGNORE" ${defaultVal === "IGNORE" ? 'selected' : ''}>❌ Ignore this Role</option>
+                        <select data-signup-role="${role}" class="bg-gray-700 text-white rounded p-2 border border-gray-600 w-full focus:ring-yellow-500">
+                            <option value="AOE DPS" ${currentAssigned === "AOE DPS" ? 'selected' : ''}>AOE DPS</option>
+                            <option value="Healer" ${currentAssigned === "Healer" ? 'selected' : ''}>Healer</option>
+                            <option value="Boon Support" ${currentAssigned === "Boon Support" ? 'selected' : ''}>Boon Support</option>
+                            <option value="DPS" ${currentAssigned === "DPS" ? 'selected' : ''}>DPS</option>
+                            <option value="Main Stabs" ${currentAssigned === "Main Stabs" ? 'selected' : ''}>Main Stabs</option>
+                            <option value="Commander" ${currentAssigned === "Commander" ? 'selected' : ''}>Commander</option>
+                            <option value="Support Spellbreaker" ${currentAssigned === "Support Spellbreaker" ? 'selected' : ''}>Support Spellbreaker</option>
+                            <option value="IGNORE" ${currentAssigned === "IGNORE" ? 'selected' : ''}>❌ Ignore this Role</option>
                         </select>
                     </td>
                 `;
                 mappingTbody.appendChild(row);
             });
-
-            document.getElementById('input-section').classList.add('hidden');
-            document.getElementById('mapping-section').classList.remove('hidden');
         }
 
         function applyMappingsAndGenerate() {
             const selects = document.querySelectorAll('#mapping-tbody select');
             window.customRoleMappings = {};
-            
             selects.forEach(sel => {
                 window.customRoleMappings[sel.getAttribute('data-signup-role')] = sel.value;
             });
 
-            const selectedCount = document.getElementById('participant-count').value;
-            document.getElementById('grid-participant-count').value = selectedCount;
-
+            const selectedCount = document.getElementById('grid-participant-count').value;
             buildSquadGrid(GROUP_CONFIGS[selectedCount], window.currentRoster, null);
-
-            document.getElementById('mapping-section').classList.add('hidden');
-            document.getElementById('grid-section').classList.remove('hidden');
-        }
-
-        function handleLayoutCodeLoad(signupText) {
-             try {
-                const encoded = signupText.substring(CODE_PREFIX.length);
-                const decodedData = atob(encoded);
-                const parts = decodedData.split('|');
-                const savedSize = parts[0];
-                const layoutArray = parts.slice(1).map(item => item === COMPRESSION_CODE ? EMPTY_PLACEHOLDER : item);
-                
-                document.getElementById('grid-participant-count').value = savedSize;
-                buildSquadGrid(GROUP_CONFIGS[savedSize], null, layoutArray);
-                
-                window.currentRoster = { isLayout: true, size: savedSize, layout: layoutArray };
-                document.getElementById('input-section').classList.add('hidden');
-                document.getElementById('grid-section').classList.remove('hidden');
-            } catch (e) { alert("Invalid layout code."); }
+            
+            // Scroll back up to the grid
+            document.getElementById('squad-grid').scrollIntoView({ behavior: 'smooth' });
         }
 
         function buildSquadGrid(totalGroups, roster = null, layoutArray = null) {
@@ -361,6 +357,26 @@
             gridContainer.innerHTML = html + `</tbody></table>`;
         }
 
+        // --- Standard Helpers ---
+
+        function handleLayoutCodeLoad(signupText) {
+             try {
+                const encoded = signupText.substring(CODE_PREFIX.length);
+                const decodedData = atob(encoded);
+                const parts = decodedData.split('|');
+                const savedSize = parts[0];
+                const layoutArray = parts.slice(1).map(item => item === COMPRESSION_CODE ? EMPTY_PLACEHOLDER : item);
+                
+                document.getElementById('grid-participant-count').value = savedSize;
+                buildSquadGrid(GROUP_CONFIGS[savedSize], null, layoutArray);
+                
+                window.currentRoster = { isLayout: true, size: savedSize, layout: layoutArray };
+                document.getElementById('input-section').classList.add('hidden');
+                document.getElementById('grid-section').classList.remove('hidden');
+                document.getElementById('mapping-adjustment-ui').classList.add('hidden'); // Hide mapping for loaded codes
+            } catch (e) { alert("Invalid layout code."); }
+        }
+
         function parseSignupList(text) {
             let cleaned = text.replace(/:\w+:\s*/g, ' ').replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
             const lines = cleaned.split('\n').map(l => l.trim()).filter(l => l.length > 0);
@@ -424,13 +440,8 @@
             buildSquadGrid(GROUP_CONFIGS[count], window.currentRoster, null);
         }
 
-        function resetApp() {
-            location.reload();
-        }
-
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-        }
+        function resetApp() { location.reload(); }
+        function toggleTheme() { document.body.classList.toggle('light-mode'); }
     </script>
 </body>
 </html>
