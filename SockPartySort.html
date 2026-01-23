@@ -252,7 +252,7 @@
         }
 
         function drop(event) {
-            event.preventDefault();w
+            event.preventDefault();
             const targetCell = event.target.closest('td[draggable="true"]');
             
             // Check for valid drag/drop
@@ -317,206 +317,229 @@
             }
         }
         
-function parseSignupList(text) {
-        let cleanedText = text.replace(/:\w+:\s*/g, ' ').replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
-        const lines = cleanedText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-        const roster = {};
-        let currentRole = null;
-        
-        // Broadened regex to capture any role name before the (x/y) count
-        const roleRegex = /^\s*([^(\n]+)\s*\(\d+\/\d+\):?\s*$/; 
-        const accountNameRegex = /\(([^)]+\.\d{4})\)/g;
-
-        for (const line of lines) {
-            const roleMatch = line.match(roleRegex);
-            if (roleMatch) {
-                currentRole = roleMatch[1].trim();
-                roster[currentRole] = roster[currentRole] || [];
-                continue;
-            }
-            if (currentRole && line.startsWith('└')) {
-                const matches = [...line.matchAll(accountNameRegex)];
-                if (matches.length > 0) {
-                    const accountName = matches[matches.length - 1][1];
-                    roster[currentRole].push(accountName);
-                }
-            }
-        }
-        return roster;
-    }
-
-function buildSquadGrid(totalGroups, roster = null, layoutArray = null) {
-    const gridContainer = document.getElementById('squad-grid');
-    gridContainer.innerHTML = ''; // Clear previous grid
-
-    let html = `
-        <table class="min-w-full divide-y divide-gray-600 rounded-lg overflow-hidden shadow-2xl">
-            <thead class="bg-gray-800/80">
-                <tr>
-                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                        Group
-                    </th>
-                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider ${ROLES['AOE DPS']}">
-                        AOE DPS
-                    </th>
-                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider ${ROLES['Healer']}">
-                        Healer
-                    </th>
-                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider ${ROLES['Boon Support']}">
-                        Boon Support
-                    </th>
-                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider ${ROLES['DPS']}">
-                        DPS
-                    </th>
-                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider ${ROLES['Main Stabs']}">
-                        Main Stabs
-                    </th> 
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-700">
-    `; 
-
-const placeholderEmpty = EMPTY_PLACEHOLDER;
-    const placeholderLobby = 'Lobby';
-    const dragDropAttr = ' draggable="true" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)"';
-    const roleClasses = [ROLES['AOE DPS'], ROLES['Healer'], ROLES['Boon Support'], ROLES['DPS'], ROLES['Main Stabs']];
-
-    // If a layout array is provided, use it to get players sequentially
-    let playerIndex = 0; 
-    const getNextPlayerFromLayout = () => layoutArray ? layoutArray[playerIndex++] : null;
-
-    // Define queues for role-based distribution
-    let commanderQueue = [];
-    let healerQueue = [];
-    let boonSupportQueue = [];
-    let supportSpellbreakerQueue = [];
-    let dpsQueue = [];
-    let aoeDpsQueue = [];
-    let mainStabsQueue = [];
-
-    // Helper to dequeue a player or provide placeholder
-    const getNextPlayer = (queue) => queue.shift() || placeholderEmpty;
-
-    if (!layoutArray && roster) {
-        // Deep copy roster to avoid mutating state
-        const tempRoster = JSON.parse(JSON.stringify(roster));
-        
-        commanderQueue = tempRoster['Commander'] || [];
-        
-        // MAPPING: Healers
-        const mainHealerQueue = tempRoster['Main Healer'] || [];
-        healerQueue = (tempRoster['Healer'] || []).concat(mainHealerQueue);
-        
-        // DYNAMIC MAPPING: Boon Support (Includes 'Harb', 'Secondary', etc.)
-        boonSupportQueue = Object.keys(tempRoster)
-            .filter(role => (role.includes('Boon Support') || role === 'Secondary Support') && role !== 'Support Spellbreaker')
-            .flatMap(role => tempRoster[role]);
-        
-        supportSpellbreakerQueue = tempRoster['Support Spellbreaker'] || [];
-        dpsQueue = tempRoster['DPS'] || [];
-        
-        // DYNAMIC MAPPING: AOE DPS & Boon Strips
-        const boonStripsAndPullsQueue = tempRoster['Boon Strips & Pulls'] || [];
-        aoeDpsQueue = Object.keys(tempRoster)
-            .filter(role => role.includes('AOE DPS'))
-            .flatMap(role => tempRoster[role])
-            .concat(boonStripsAndPullsQueue);
-
-        mainStabsQueue = tempRoster['Main Stabs'] || [];
-    }
-    
-    // Loop for the required number of groups
-    for (let i = 1; i <= totalGroups; i++) {
-        let rowHtml = `<tr class="bg-gray-700/50 hover:bg-gray-600/50 transition-colors duration-150">`;
-
-        // 1. Group Label
-        rowHtml += `<td class="px-3 py-2 whitespace-nowrap font-medium">Group ${i}</td>`;
-        
-        // Define the structure for this row (5 slots)
-        const slots = [];
-
-        if (i === 1) {
-            // Group 1: Lobby (5 cells, always lobby placeholder)
-            for (let j = 0; j < 5; j++) {
-                const playerContent = layoutArray ? getNextPlayerFromLayout() : placeholderLobby;
-                slots.push({ player: playerContent, roleClass: roleClasses[j], roleName: 'Lobby Slot', placeholder: placeholderLobby, isLobby: true });
-            }
-        } else if (i === 2) {
-            // Group 2: Commander slot and standard roles
-            if (layoutArray) {
-                slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['Commander'], roleName: 'Commander', placeholder: placeholderEmpty });
-                slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['Healer'], roleName: 'Healer', placeholder: placeholderEmpty });
-                slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['Boon Support'], roleName: 'Boon Support', placeholder: placeholderEmpty });
-                slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['DPS'], roleName: 'DPS', placeholder: placeholderEmpty });
-                slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['Main Stabs'], roleName: 'Main Stabs', placeholder: placeholderEmpty });
-            } else {
-                slots.push({ player: getNextPlayer(commanderQueue), roleClass: ROLES['Commander'], roleName: 'Commander', placeholder: placeholderEmpty });
-                slots.push({ player: getNextPlayer(healerQueue), roleClass: ROLES['Healer'], roleName: 'Healer', placeholder: placeholderEmpty });
-                slots.push({ player: getNextPlayer(boonSupportQueue), roleClass: ROLES['Boon Support'], roleName: 'Boon Support', placeholder: placeholderEmpty });
-                slots.push({ player: getNextPlayer(dpsQueue), roleClass: ROLES['DPS'], roleName: 'DPS', placeholder: placeholderEmpty });
-                slots.push({ player: getNextPlayer(mainStabsQueue), roleClass: ROLES['Main Stabs'], roleName: 'Main Stabs', placeholder: placeholderEmpty });
-            }
-        } else {
-            // Groups 3+ (Standard or Spellbreaker variation)
-            if (layoutArray) {
-                slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['AOE DPS'], roleName: 'AOE DPS', placeholder: placeholderEmpty });
-                slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['Healer'], roleName: 'Healer', placeholder: placeholderEmpty });
-                slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['Boon Support'], roleName: 'Boon Support / SB', placeholder: placeholderEmpty });
-                slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['DPS'], roleName: 'DPS', placeholder: placeholderEmpty });
-                slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['Main Stabs'], roleName: 'Main Stabs', placeholder: placeholderEmpty });
-            } else {
-                slots.push({ player: getNextPlayer(aoeDpsQueue), roleClass: ROLES['AOE DPS'], roleName: 'AOE DPS', placeholder: placeholderEmpty });
-                slots.push({ player: getNextPlayer(healerQueue), roleClass: ROLES['Healer'], roleName: 'Healer', placeholder: placeholderEmpty });
-
-                let player;
-                let roleName;
-                let roleClass = ROLES['Boon Support']; 
-
-                if (SPELLBREAKER_GROUPS.includes(i) && supportSpellbreakerQueue.length > 0) {
-                    player = getNextPlayer(supportSpellbreakerQueue);
-                    roleName = 'Support Spellbreaker (Boon Support Slot)';
-                } else {
-                    player = getNextPlayer(boonSupportQueue);
-                    roleName = 'Boon Support';
-                }
-                slots.push({ player, roleClass, roleName, placeholder: placeholderEmpty });
-
-                slots.push({ player: getNextPlayer(dpsQueue), roleClass: ROLES['DPS'], roleName: 'DPS', placeholder: placeholderEmpty });
-                slots.push({ player: getNextPlayer(mainStabsQueue), roleClass: ROLES['Main Stabs'], roleName: 'Main Stabs', placeholder: placeholderEmpty });
-            }
-        }
-        
-        // Render the cells
-        slots.forEach(slot => {
-            const isPlayer = !slot.player.includes('EMPTY') && !slot.isLobby;
-            const cellStyleClass = isPlayer ? slot.roleClass : 'role-empty';
-            const targetRoleClass = slot.roleClass; 
+        function parseSignupList(text) {
+            // Step 1: Aggressively clean the input text to remove Discord emoji placeholders and non-printing characters.
+            let cleanedText = text;
+            // 1a. Remove Discord emoji placeholders (:word:) and the space/tab that often follows.
+            cleanedText = cleanedText.replace(/:\w+:\s*/g, ' '); 
+            // 1b. Replace any zero-width space or similar characters.
+            cleanedText = cleanedText.replace(/[\u200B-\u200D\uFEFF]/g, '');
+            // 1c. Remove any leading/trailing spaces from the overall block.
+            cleanedText = cleanedText.trim();
             
-            const editableAttr = isPlayer 
-                ? '' 
-                : ` contenteditable="true" onblur="handleCellEdit(this)"`;
-            const roleSpecificClasses = isPlayer ? '' : ' opacity-50 text-center';
+            const lines = cleanedText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            
+            const roster = {};
+            let currentRole = null;
+            
+            // Regex to match the role header: e.g., "Commander (1/1)"
+            const roleRegex = /^\s*([A-Za-z\s\/&]+)\s*\(\d+\/\d+\):?\s*$/; 
+            
+            // Regex to capture GW2 account names (Name.1234) inside parentheses globally
+            const accountNameRegex = /\(([^)]+\.\d{4})\)/g;
 
-            rowHtml += `<td class="px-3 py-2 whitespace-nowrap font-semibold ${cellStyleClass}${roleSpecificClasses}" 
-                            title="${slot.roleName}"
-                            data-role-class="${targetRoleClass}"
-                            data-placeholder="${slot.placeholder}"
-                            ${editableAttr}
-                            ${dragDropAttr}>
-                            ${slot.player}
-                        </td>`;
-        });
+            for (const line of lines) {
+                // Check for a new role header
+                const roleMatch = line.match(roleRegex);
+                if (roleMatch) {
+                    currentRole = roleMatch[1].trim();
+                    roster[currentRole] = roster[currentRole] || [];
+                    continue;
+                }
 
-        rowHtml += `</tr>`;
-        html += rowHtml;
-    }
+                // Check for a player line (starts with '└' and contains account name)
+                if (currentRole && line.startsWith('└')) {
+                    const matches = [...line.matchAll(accountNameRegex)];
+                    
+                    if (matches.length > 0) {
+                        // The last matched group (index 1 of the last match) is the account name
+                        const accountName = matches[matches.length - 1][1];
+                        roster[currentRole].push(accountName);
+                    }
+                }
+            }
+            return roster;
+        }
 
-    html += `
-            </tbody>
-        </table>
-    `;
-    gridContainer.innerHTML = html;
-}
+        function buildSquadGrid(totalGroups, roster = null, layoutArray = null) {
+            const gridContainer = document.getElementById('squad-grid');
+            gridContainer.innerHTML = ''; // Clear previous grid
+
+            let html = `
+                <table class="min-w-full divide-y divide-gray-600 rounded-lg overflow-hidden shadow-2xl">
+                    <thead class="bg-gray-800/80">
+                        <tr>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                                Group
+                            </th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider ${ROLES['AOE DPS']}">
+                                AOE DPS
+                            </th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider ${ROLES['Healer']}">
+                                Healer
+                            </th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider ${ROLES['Boon Support']}">
+                                Boon Support
+                            </th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider ${ROLES['DPS']}">
+                                DPS
+                            </th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider ${ROLES['Main Stabs']}">
+                                Main Stabs
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+            `;
+
+            const placeholderEmpty = EMPTY_PLACEHOLDER;
+            const placeholderLobby = 'Lobby';
+            const dragDropAttr = ' draggable="true" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)"';
+            const roleClasses = [ROLES['AOE DPS'], ROLES['Healer'], ROLES['Boon Support'], ROLES['DPS'], ROLES['Main Stabs']];
+
+            // If a layout array is provided, use it to get players sequentially
+            let playerIndex = 0; 
+            const getNextPlayerFromLayout = () => layoutArray ? layoutArray[playerIndex++] : null;
+
+            // Define queues with 'let' at the function scope
+            let commanderQueue = [];
+            let healerQueue = [];
+            let boonSupportQueue = [];
+            let supportSpellbreakerQueue = [];
+            let dpsQueue = [];
+            let aoeDpsQueue = [];
+            let mainStabsQueue = [];
+
+            // Helper to dequeue a player or provide placeholder
+            const getNextPlayer = (queue) => queue.shift() || placeholderEmpty;
+
+            if (!layoutArray && roster) {
+                // Prepare queues for roles from the roster (Populated only if processing a raw roster)
+                const tempRoster = JSON.parse(JSON.stringify(roster));
+                
+                commanderQueue = tempRoster['Commander'] || [];
+                
+                // MAPPING: Main Healer players go into Healer queue
+                const mainHealerQueue = tempRoster['Main Healer'] || [];
+                healerQueue = (tempRoster['Healer'] || []).concat(mainHealerQueue);
+                
+                // MAPPING: Secondary Support players go into Boon Support queue
+                const secondarySupportQueue = tempRoster['Secondary Support'] || [];
+                boonSupportQueue = (tempRoster['Boon Support'] || []).concat(secondarySupportQueue);
+                
+                supportSpellbreakerQueue = tempRoster['Support Spellbreaker'] || [];
+                dpsQueue = tempRoster['DPS'] || [];
+                
+                // MAPPING: Boon Strips & Pulls players go into AOE DPS pool
+                const boonStripsAndPullsQueue = tempRoster['Boon Strips & Pulls'] || [];
+                
+                // Merge all AOE DPS types and Boon Strips & Pulls into a single pool
+                aoeDpsQueue = Object.keys(tempRoster)
+                    .filter(role => role.startsWith('AOE DPS'))
+                    .flatMap(role => tempRoster[role])
+                    .concat(boonStripsAndPullsQueue);
+
+                mainStabsQueue = tempRoster['Main Stabs'] || [];
+            }
+            
+            // Loop for the required number of groups
+            for (let i = 1; i <= totalGroups; i++) {
+                let rowHtml = `<tr class="bg-gray-700/50 hover:bg-gray-600/50 transition-colors duration-150">`;
+
+                // 1. Group Label
+                rowHtml += `<td class="px-3 py-2 whitespace-nowrap font-medium">Group ${i}</td>`;
+                
+                // Define the structure for this row (5 slots)
+                const slots = [];
+
+                if (i === 1) {
+                    // Group 1: Lobby (5 cells, always lobby placeholder)
+                    for (let j = 0; j < 5; j++) {
+                        const playerContent = layoutArray ? getNextPlayerFromLayout() : placeholderLobby;
+                        slots.push({ player: playerContent, roleClass: roleClasses[j], roleName: 'Lobby Slot', placeholder: placeholderLobby, isLobby: true });
+                    }
+                } else if (i === 2) {
+                    // Group 2: Commander slot and standard roles
+                    if (layoutArray) {
+                        slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['Commander'], roleName: 'Commander', placeholder: placeholderEmpty });
+                        slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['Healer'], roleName: 'Healer', placeholder: placeholderEmpty });
+                        slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['Boon Support'], roleName: 'Boon Support', placeholder: placeholderEmpty });
+                        slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['DPS'], roleName: 'DPS', placeholder: placeholderEmpty });
+                        slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['Main Stabs'], roleName: 'Main Stabs', placeholder: placeholderEmpty });
+                    } else {
+                        // Roster-based queue loading
+                        slots.push({ player: getNextPlayer(commanderQueue), roleClass: ROLES['Commander'], roleName: 'Commander', placeholder: placeholderEmpty });
+                        slots.push({ player: getNextPlayer(healerQueue), roleClass: ROLES['Healer'], roleName: 'Healer', placeholder: placeholderEmpty });
+                        slots.push({ player: getNextPlayer(boonSupportQueue), roleClass: ROLES['Boon Support'], roleName: 'Boon Support', placeholder: placeholderEmpty });
+                        slots.push({ player: getNextPlayer(dpsQueue), roleClass: ROLES['DPS'], roleName: 'DPS', placeholder: placeholderEmpty });
+                        slots.push({ player: getNextPlayer(mainStabsQueue), roleClass: ROLES['Main Stabs'], roleName: 'Main Stabs', placeholder: placeholderEmpty });
+                    }
+                } else {
+                    // Groups 3+ (Standard or Spellbreaker variation)
+                    if (layoutArray) {
+                        // Sequential loading from saved array
+                        slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['AOE DPS'], roleName: 'AOE DPS', placeholder: placeholderEmpty });
+                        slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['Healer'], roleName: 'Healer', placeholder: placeholderEmpty });
+                        slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['Boon Support'], roleName: 'Boon Support / SB', placeholder: placeholderEmpty });
+                        slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['DPS'], roleName: 'DPS', placeholder: placeholderEmpty });
+                        slots.push({ player: getNextPlayerFromLayout(), roleClass: ROLES['Main Stabs'], roleName: 'Main Stabs', placeholder: placeholderEmpty });
+                    } else {
+                        // Role-based queue loading
+                        slots.push({ player: getNextPlayer(aoeDpsQueue), roleClass: ROLES['AOE DPS'], roleName: 'AOE DPS', placeholder: placeholderEmpty });
+                        slots.push({ player: getNextPlayer(healerQueue), roleClass: ROLES['Healer'], roleName: 'Healer', placeholder: placeholderEmpty });
+
+                        let player;
+                        let roleName;
+                        let roleClass = ROLES['Boon Support']; 
+
+                        if (SPELLBREAKER_GROUPS.includes(i) && supportSpellbreakerQueue.length > 0) {
+                            player = getNextPlayer(supportSpellbreakerQueue);
+                            roleName = 'Support Spellbreaker (Boon Support Slot)';
+                        } else {
+                            player = getNextPlayer(boonSupportQueue);
+                            roleName = 'Boon Support';
+                        }
+                        slots.push({ player, roleClass, roleName, placeholder: placeholderEmpty });
+
+                        slots.push({ player: getNextPlayer(dpsQueue), roleClass: ROLES['DPS'], roleName: 'DPS', placeholder: placeholderEmpty });
+                        slots.push({ player: getNextPlayer(mainStabsQueue), roleClass: ROLES['Main Stabs'], roleName: 'Main Stabs', placeholder: placeholderEmpty });
+                    }
+                }
+                
+                // Render the slots
+                slots.forEach(slot => {
+                    // Check for empty based on placeholder text, or if isLobby
+                    const isPlayer = !slot.player.includes('EMPTY') && !slot.isLobby;
+                    
+                    // Style class is the role class if filled, or role-empty if not
+                    const cellStyleClass = isPlayer ? slot.roleClass : 'role-empty';
+                    const targetRoleClass = slot.roleClass; 
+                    
+                    const editableAttr = isPlayer 
+                        ? '' 
+                        : ` contenteditable="true" onblur="handleCellEdit(this)"`;
+                    const roleSpecificClasses = isPlayer ? '' : ' opacity-50 text-center';
+
+                    rowHtml += `<td class="px-3 py-2 whitespace-nowrap font-semibold ${cellStyleClass}${roleSpecificClasses}" 
+                                    title="${slot.roleName}"
+                                    data-role-class="${targetRoleClass}"
+                                    data-placeholder="${slot.placeholder}"
+                                    ${editableAttr}
+                                    ${dragDropAttr}>
+                                    ${slot.player}
+                                </td>`;
+                });
+
+                rowHtml += `</tr>`;
+                html += rowHtml;
+            }
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+            gridContainer.innerHTML = html;
+        }
 
         function createLayoutCode() {
             const currentSize = document.getElementById('grid-participant-count').value;
