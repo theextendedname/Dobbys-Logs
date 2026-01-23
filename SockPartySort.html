@@ -118,7 +118,7 @@
         <h1 class="text-4xl font-bold mb-8 text-center">Squad Builder</h1>
 
         <div id="input-section" class="bg-gray-700/50 p-6 rounded-lg shadow-xl">
-            <h2 class="text-2xl font-semibold mb-4">1. Paste Sign-up List or Layout Code</h2>
+            <h2 class="text-2xl font-semibold mb-4">Paste Sign-up List or Layout Code</h2>
             
             <div class="mb-4">
                 <label for="participant-count" class="block text-sm font-medium mb-1">Target Participant Count:</label>
@@ -247,12 +247,13 @@
                 let defaultVal = "DPS"; 
                 const lowRole = role.toLowerCase();
                 
+                // Rules prioritised to catch specific "Boon Strips" before general "Boon"
                 if (role.startsWith("Participants")) defaultVal = "IGNORE";
                 else if (lowRole.includes('commander')) defaultVal = "Commander";
                 else if (lowRole.includes('healer')) defaultVal = "Healer";
+                else if (lowRole.includes('strip') || lowRole.includes('pull') || lowRole.includes('aoe')) defaultVal = "AOE DPS";
                 else if (lowRole.includes('boon') || lowRole.includes('harb') || lowRole.includes('secondary')) defaultVal = "Boon Support";
                 else if (lowRole.includes('spellbreaker')) defaultVal = "Support Spellbreaker";
-                else if (lowRole.includes('aoe') || lowRole.includes('strip') || lowRole.includes('pulls')) defaultVal = "AOE DPS";
                 else if (lowRole.includes('stab')) defaultVal = "Main Stabs";
 
                 window.customRoleMappings[role] = defaultVal;
