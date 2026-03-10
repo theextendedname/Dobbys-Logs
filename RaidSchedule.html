@@ -312,7 +312,9 @@
 
                 // Use 'Z' for the short UTC offset (e.g., -5, +8)
                 // The format will be "h:mm a Z" -> "4:30 AM -5"
-                return localDateTime.toFormat('h:mm a Z'); 
+                //return localDateTime.toFormat('h:mm a Z'); 
+                //more readable string (like EST or EDT),
+                return localDateTime.toFormat('h:mm a (ZZZZ)');
             }
 
             // 3. Iteration Logic (Remains the same as it calls the fixed function)
