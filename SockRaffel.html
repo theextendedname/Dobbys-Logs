@@ -3,433 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOCK Attendance Raffle</title>
-    
-    <script>
-        // Global object to store the data captured from index.js
-        window.raffleDataConfig = {};
-
-        // Define a minimal placeholder for 'gridjs' and its 'Grid' constructor.
-        window.gridjs = {
-            Grid: function(config) {
-                if (!window.raffleDataConfig.columns && config && config.columns && config.data) {
-                    window.raffleDataConfig.columns = config.columns;
-                    window.raffleDataConfig.data = config.data;
-                }
-                return {
-                    render: function() {}
-                };
-            }
-        };
-    </script>
-
-    <script src="src/index.js"></script>
-
+    <title>Dobby's Army - Tool Has Moved</title>
     <style>
-        /*
-         * --- ORIGINAL BODY STYLE MODIFIED ---
-         * 1. The Dobby-Picks.png image is now set with the correct path 'src/Dobby-Picks.png'.
-         * 2. A ::before pseudo-element is used to create a 50% opacity dark overlay over the image.
-        */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #1a202c; 
-            color: #e2e8f0; 
-            transition: background-color 0.3s ease, color 0.3s ease, background-image 0.5s ease-in-out; 
-            position: relative;             
-            
-            background-image: url('src/Dobby-Picks.png'); /* UPDATED PATH */
-            background-size: cover; 
-            background-repeat: no-repeat; 
-            background-position: center center; 
-            background-attachment: fixed; 
-            /* ------------------------------------------- */
-        }
-        
-        /* --- Overlay for 50% opacity effect --- */
-        body::before {
-            content: '';
-            position: fixed; /* Ensures it covers the entire viewport */
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            /* Semi-transparent dark overlay (0.5 opacity) */
-            background-color: rgba(0, 0, 0, 0.5); 
-            z-index: -1; /* Place it behind the content */
-            pointer-events: none; /* Allows clicks to pass through */
-        }
-
-        /* Custom styles for the slot machine and button */
-        .slot-machine {
+            background-color: #0b1426; /* Dark navy from your screenshot */
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-top: 50px;
-        }
-        .slot {
-            background-color: #4a5568; 
-            border: 4px solid #F29F05;
-            border-radius: 8px;
-            margin: 0 10px;
-            width: 300px;
-            height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            font-weight: bold;
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
-            transition: box-shadow 0.3s ease;
-        }
-
-        /* --- GLOWING WINNER EFFECT --- */
-        @keyframes glowing {
-            0% { box-shadow: 0 0 5px #F29F05, 0 0 10px #F29F05; }
-            50% { box-shadow: 0 0 20px #ffcc00, 0 0 40px #ffcc00; }
-            100% { box-shadow: 0 0 5px #F29F05, 0 0 10px #F29F05; }
-        }
-
-        .slot.winner {
-            animation: glowing 1.5s infinite alternate; 
-            border-color: #ffcc00; 
-        }
-        /* ------------------------------------- */
-
-        .slot-inner {
-            width: 100%;
-            text-align: center;
-            position: absolute;
-            transition: transform 0.1s ease-out;
-        }
-        .draw-button {
-            display: block;
-            width: 300px;
-            margin: 40px auto 20px auto;
-            padding: 15px 30px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            background-color: #00A6A6; 
-            color: white;
-            border: none;
-            border-radius: 6px;
-            transition: background-color 0.3s ease;
-        }
-        .draw-button:hover {
-            background-color: #007a7a;
-        }
-        .draw-button:disabled {
-            background-color: #4a5568;
-            cursor: not-allowed;
-        }
-        .winner-display {
-            text-align: center;
-            margin-top: 30px;
-            font-size: 1.5rem;
-            color: #F29F05;
-            min-height: 40px;
-            /* Make text readable over the background image */
-            background-color: rgba(26, 32, 44, 0.7); 
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 5px;
-        }
-        /* Center the winner display element */
-        .winner-display-container {
+            min-height: 100vh;
+            margin: 0;
             text-align: center;
         }
 
-        /* --- Entry Counter Display --- */
-        .entry-count-container {
-            text-align: center;
-            margin-top: 10px;
-            font-size: 1.2rem;
-            /* Make text readable over the background image */
-            background-color: rgba(26, 32, 44, 0.7); 
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 5px;
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 15px;
+            border: 2px solid #c5a059; /* Gold border */
+            max-width: 800px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .entry-count-value {
+
+        .header-img {
+            max-width: 300px;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            color: #c5a059;
+            font-variant: small-caps;
             font-size: 2.5rem;
-            font-weight: bold;
-            color: #00A6A6;
-            display: inline-block;
-            min-width: 50px; 
+            margin-bottom: 0.5rem;
+            letter-spacing: 2px;
         }
 
-        /* --- CONFETTI STYLES --- */
-        .confetti-container {
-            position: fixed;
-            top: 0;
-            left: 0;
+        p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .dobby-scene {
             width: 100%;
-            height: 100%;
-            pointer-events: none; 
-            overflow: hidden;
-            z-index: 1000;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #3e4a61;
+            margin-bottom: 2rem;
         }
 
-        .confetti {
-            position: absolute;
-            width: 10px;
-            height: 20px;
-            opacity: 0;
-            border-radius: 2px;
-            transform: rotate(0deg);
+        .btn {
+            display: inline-block;
+            background: linear-gradient(145deg, #d4af37, #aa8a2e);
+            color: #0b1426;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            text-transform: uppercase;
         }
 
-        @keyframes fall {
-            0% { 
-                opacity: 1;
-                transform: translate(0, -100px) rotateZ(0deg); 
-            }
-            100% { 
-                opacity: 0.5;
-                transform: translate(var(--x-end), calc(100vh + 100px)) rotateZ(var(--r-end)); 
-            }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(197, 160, 89, 0.4);
+            background: linear-gradient(145deg, #e5c158, #c5a059);
         }
-        /* ----------------------------- */
+
+        .url-text {
+            display: block;
+            margin-top: 1rem;
+            color: #8a9bb8;
+            font-size: 0.9rem;
+        }
+
+        .footer-note {
+            margin-top: 2rem;
+            font-style: italic;
+            color: #62718d;
+        }
     </style>
 </head>
 <body>
-    <h1 style="text-align: center; margin-top: 50px;">🧦 SOCK Attendance Raffle🧦</h1>
 
-    <div class="winner-display-container">
-        <div class="winner-display" id="winner-message">Loading data...</div> 
-    </div>
-    
-    <div class="winner-display-container">
-        <div class="entry-count-container">
-            Total Raffle Entries: <span id="entry-count-value" class="entry-count-value">0</span>
+    <div class="container">
+        <h1>Tool Has Moved</h1>
+        
+        <p>Master has given Dobby a new URL! <br> 
+           Our Attendance and Guild Roster tools have set off for a grander dwelling.</p>
+
+        <img src="src/dobbymoved.png" alt="Dobby walking to the new location" class="dobby-scene">
+
+        <div>
+            <a href="https://sockbot.dobby-is-free.com/raffle class="btn">Go to the New Home</a>
+            <a href="https://sockbot.dobby-is-free.com/raffle" class="url-text">https://sockbot.dobby-is-free.com/raffle/</a>
         </div>
+
+        <p class="footer-note">Praise Joko. Dobby is Free.</p>
     </div>
 
-    <div class="slot-machine">
-        <div class="slot" id="slot-container-1"><div class="slot-inner">?</div></div>
-        <div class="slot" id="slot-container-2"><div class="slot-inner">?</div></div>
-        <div class="slot" id="slot-container-3"><div class="slot-inner">?</div></div>
-    </div>
-
-    <button class="draw-button" id="draw-button" disabled>Draw Winner</button>
-    
-    <div id="confetti-container" class="confetti-container"></div> 
-
-    <script>
-        // --- Global Variables ---
-        let raffleEntries = [];
-        const requiredColumnsAgnostic = ["accountname", "30-dayattend", "30d-signed-up"]; 
-
-        // --- Get DOM elements ---
-        const body = document.body; // Reference to the body element
-        const slots = [
-            document.getElementById('slot-container-1'),
-            document.getElementById('slot-container-2'),
-            document.getElementById('slot-container-3')
-        ];
-        const drawButton = document.getElementById('draw-button');
-        const winnerMessage = document.getElementById('winner-message');
-        const entryCountValue = document.getElementById('entry-count-value');
-        const confettiContainer = document.getElementById('confetti-container'); 
-
-        // --- UPDATED: maxDrawDuration increased to 8000ms (8 seconds) ---
-        const maxDrawDuration = 8000; 
-        const slotInterval = 100;
-        const confettiColors = ['#F29F05', '#00A6A6', '#ffcc00', '#FFFFFF', '#FF6B6B', '#4ECDC4'];
-
-
-        // --- Utility Functions ---
-
-        function cleanString(str) {
-            return String(str).toLowerCase().replace(/\s/g, '').trim();
-        }
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
-        function pickWinner() {
-            if (raffleEntries.length === 0) return null;
-            const randomIndex = Math.floor(Math.random() * raffleEntries.length);
-            return raffleEntries[randomIndex];
-        }
-
-        // --- CONFETTI LAUNCHER ---
-        function launchConfetti() {
-            const count = 100; 
-            const duration = 5000; 
-            
-            confettiContainer.innerHTML = ''; 
-
-            for (let i = 0; i < count; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                
-                const color = confettiColors[Math.floor(Math.random() * confettiColors.length)];
-                const xStart = Math.random() * window.innerWidth;
-                const xEnd = (Math.random() - 0.5) * 500 + 'px'; 
-                const rotationEnd = Math.random() * 1000 + 'deg';
-
-                confetti.style.backgroundColor = color;
-                confetti.style.left = xStart + 'px';
-                confetti.style.animation = `fall ${duration / 1000}s ease-in-out forwards`;
-                confetti.style.animationDelay = `${Math.random() * 0.5}s`;
-                confetti.style.setProperty('--x-end', xEnd);
-                confetti.style.setProperty('--r-end', rotationEnd);
-                
-                confettiContainer.appendChild(confetti);
-            }
-
-            setTimeout(() => {
-                confettiContainer.innerHTML = '';
-            }, duration + 500); 
-        }
-
-        // --- Counting Animation ---
-        function animateCount(targetValue) {
-            let start = 0;
-            const duration = 1500; 
-            const range = targetValue - start;
-            let current = start;
-            const increment = range / (duration / 10);
-            const stepTime = 10; 
-
-            const timer = setInterval(() => {
-                current += increment;
-                if (current < targetValue) {
-                    entryCountValue.textContent = Math.round(current);
-                } else {
-                    clearInterval(timer);
-                    entryCountValue.textContent = targetValue;
-                    
-                    if (targetValue > 0) {
-                        winnerMessage.textContent = `Data loaded! Ready to pick a winner from the last 30 days.`;
-                        drawButton.disabled = false;
-                        drawButton.addEventListener('click', startRaffleDraw); 
-                    } else {
-                        winnerMessage.textContent = "No accounts have qualified entries (30D Attend and 30D Signed-Up must be > 0)!";
-                        drawButton.disabled = true;
-                    }
-                }
-            }, stepTime);
-        }
-
-        // --- Core Data Processing Function ---
-        function initializeRaffleData() {
-            const dataConfig = window.raffleDataConfig;
-            const columns = dataConfig.columns;
-            const rawData = dataConfig.data;
-            let entries = [];
-            
-            if (!columns || !rawData) {
-                winnerMessage.textContent = "Error: Could not extract columns and data from index.js.";
-                return;
-            }
-            
-            const normalizedFileColumns = columns.map(cleanString);
-
-            const accountNameIndex = normalizedFileColumns.indexOf(requiredColumnsAgnostic[0]);
-            const attend30DIndex = normalizedFileColumns.indexOf(requiredColumnsAgnostic[1]);
-            const signedUp30DIndex = normalizedFileColumns.indexOf(requiredColumnsAgnostic[2]);
-
-            if (accountNameIndex === -1 || attend30DIndex === -1 || signedUp30DIndex === -1) {
-                winnerMessage.textContent = `Error: Required columns not found.`;
-                return;
-            }
-
-            rawData.forEach(row => {
-                const accountName = row[accountNameIndex];
-                const attend = parseInt(row[attend30DIndex]) || 0;
-                const signedUp = parseInt(row[signedUp30DIndex]) || 0;
-                let entryCount = 0;
-
-                if (attend > 0 && signedUp > 0) {
-                    entryCount = Math.min(attend, signedUp);
-                }
-
-                for (let i = 0; i < entryCount; i++) {
-                    entries.push(accountName);
-                }
-            });
-            shuffleArray(entries);
-        
-            raffleEntries = entries;
-            winnerMessage.textContent = "Counting entries...";
-            animateCount(raffleEntries.length); 
-        }
-        
-        // --- Slot Roll Logic ---
-        function rollSlot(slotElement, finalValue, duration, delay) {
-            return new Promise(resolve => {
-                let startTime;
-                const slotInner = slotElement.querySelector('.slot-inner');
-                
-                const step = (timestamp) => {
-                    if (!startTime) startTime = timestamp;
-                    const elapsed = timestamp - startTime;
-
-                    if (elapsed < duration) {
-                        if ((elapsed % slotInterval) < 16) {
-                            const randomIndex = Math.floor(Math.random() * raffleEntries.length);
-                            const currentValue = raffleEntries[randomIndex] || "?";
-                            slotInner.textContent = currentValue;
-                        }
-                        requestAnimationFrame(step);
-                    } else {
-                        slotInner.textContent = finalValue;
-                        slotElement.classList.add('winner'); 
-                        resolve();
-                    }
-                };
-
-                setTimeout(() => {
-                    requestAnimationFrame(step);
-                }, delay);
-            });
-        }
-
-        // --- Raffle Draw Function ---
-        async function startRaffleDraw() {
-            if (drawButton.disabled) return;
-            
-            slots.forEach(slot => slot.classList.remove('winner')); 
-            
-            drawButton.disabled = true;
-            winnerMessage.textContent = "Drawing in progress...";
-            
-            const winner = pickWinner();
-            if (!winner) {
-                drawButton.disabled = false;
-                return;
-            }
-
-            slots.forEach(slot => {
-                slot.querySelector('.slot-inner').textContent = '?';
-            });
-
-            // UPDATED: First slot duration is maxDrawDuration (8000ms).
-            await Promise.all([
-                rollSlot(slots[0], winner, maxDrawDuration, 0), 
-                rollSlot(slots[1], winner, maxDrawDuration + 500, 200),
-                rollSlot(slots[2], winner, maxDrawDuration + 1000, 400)
-            ]);
-            
-            launchConfetti(); 
-
-            setTimeout(() => {
-                winnerMessage.textContent = `🎉 Congratulations to the winner: ${winner}! 🎉`;
-                drawButton.disabled = false;
-            }, 500);
-        }
-
-        // --- Execute Data Processing after all scripts and the DOM are loaded ---
-        document.addEventListener('DOMContentLoaded', initializeRaffleData);
-
-    </script>
 </body>
 </html>
