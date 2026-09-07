@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-07T04:38:01.283Z",
+  "generatedAt": "2026-09-07T04:43:01.072Z",
   "builds": [
     {
       "title": "Standard Druid Healer",
@@ -13,8 +13,12 @@
       "title": "Spellbreaker DPS Boon Strip",
       "profession": "Warrior",
       "notes": "Spellbreaker DPS Boon Strip\n- [The Build](<https://gw2skills.net/editor/?PKwEQj9pshCmUSbqpRF1O70x3S7VB-D2QYhouzeHUyh0kkoThQOrAbdWIABsHeN63pEA-w>)\n\n * Your main role on this build is Damage and Boon strip\n * Use your Spear to spike enemies at range\n * Strip boons when the group mele spikes the enemy\n * Use your melee weapons to finish enemies\n * Do not camp a weapons. Weapon swapping reduces your `Burst` cooldowns, gives you swiftness and boosts your damage by 10%\n * `Full Counter` (F2) is OP.  Endurance Gain, Adrenaline Restore, Grants Swiftness, Does Damage, Reduces your incoming Damage by 100%, Grants Stability, Grants evasion, Dazes enemies, Strips Boons. Please learn to us this Burst Skill it is amazing. \n* *Pro Tip* `For Full Counter to activate you must get hit and be within 300 range of the attacker. It is a MELEE burst skill!!`\n\n\n**Boon Strip Skill List**\n * Break Enchantments (utility)\n * Winds of Disenchantment (elite)\n\n\n**Defensive Skill List**\n * `Defiant Stance` (heal) = Convert incoming damage into healing\n * `Savage Leap` (GS 3) = Evade + Movement (Warrior's Sprint)\n * `Spear Swipe` (Spear 5) = Evade Evade\n\n\n**Range Burst**\n * `Signet of Might` (utility)\n * `Disrupting Throw` (Spear 3)\n * `Spearmarshal's Support` (Spear 4)\n * `Harrier's Toss` (Spear F1)\n * `Maiming Spear` (Spear 2)\n``The goal is to land as much damage in as short a time as possible, overlapping damage such as \nSpearmarshal's Support ⇒ Harrier's Toss to increase burst\nIf Spearmarshal's Support is on cooldown use Maiming Spear before Harrier's Toss instead``\n\n**Melee Burst (USE `Bloodthister` for BIC Damage)**\n * `Signet of Fury` (utility)\n    * If melee is hot use `Defiant Stance` (heal)\n * `Break Enchantments` (utility)\n * `Bloodthirster` (Sw F1)\n * `Full Counter` (F2)\n * `Bloodthister` (Sw  F1)\n * `Dual Strike` (Axe 4)\n * `Whirling Axe` Axe 5)\n\n  ***Boon Strip***\n *  Land `Winds of Disenchantment` (elite) on the enemy group while your group is in range to follow up with a spike. You can do this either as your group pushes into the enemy group or as the enemy group pushes into your group. In either case it ISN'T usually a good idea to go far from your own group during the cast.\n *  You should be casting `Break Enchantments` (utility) as often as possible, ideally right before either you or your group spikes the enemy group\n * `Break Enchantments`(utility) is a great way to strip boons and proc Loss Aversion to give you enough Adrenaline for Arcing Slice or Harrier's Toss \n * Spellbreaker as many passives and skill synergies that generate boon strip and boost damage. \n      * `Dispelling Force` (passive) when you daze an enemy with `Disrupting Throw` (Spear 3) you also strip a boon. That boon strip gives you adrenaline from the `Loss Aversion` trait. You also get 2 stacks of `Attacker's Insight` (trait) and strip up to 5 near by foes of one boon. Which gives even more `Attacker's Insight` (trait). There are more synergies at play here but you should get the idea.",
-      "tags": [],
-      "updatedAt": "2026-09-07T02:25:38.668Z",
+      "tags": [
+        "warrior",
+        "DPS",
+        "Boon Strip"
+      ],
+      "updatedAt": "2026-09-07T04:42:57.059Z",
       "spaUrl": "./index.html?n=spellbreaker-dps-boon-strip&b=f923cc04.bFeMYOSD1KhhperO0Be_Vajl7DxIUBcuyyC6j1rU0yE"
     }
   ]
