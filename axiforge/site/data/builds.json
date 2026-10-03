@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-15T13:17:14.852Z",
+  "generatedAt": "2026-10-03T14:15:35.174Z",
   "builds": [
     {
       "title": "Standard Druid Healer",
@@ -169,7 +169,7 @@
     {
       "title": "Luminary Main Stabs",
       "profession": "Guardian",
-      "notes": "![Luminary](https://render.guildwars2.com/file/034C203DBD60CFF19D3D5CE9E71B27CA0103F50D/3679898.png) Luminary Main Stabs\n - [Video](https://www.youtube.com/watch?v=tnwxyRZNQP8)\n\n\n\n**Rotation:**\n - On ~900 range, cast @[skill:9153:\"Stand Your Ground!\"]  -> @[skill:78837:Radiant Justice] F1\n - when moving towards/away from enemy blob cast @[skill:29965:\"Feel My Wrath!\"]  (elite skill)\n - On initial melee clash -> @[skill:78358:Radiant Courage] F3 -> @[skill:78604:Radiant Resolve] F2 \n - Rotation during melee clash: \n   1. Enter Forge -> Forge Rotation -> exit Forge\n   3. Staff @[skill:9143:Symbol of Swiftness] 3 and @[skill:9140:Holy Strike] 2 (if under heavy condi pressure)\n   4. @[skill:999999:Weapon Swap]  mace/shield\n   5. @[skill:9086:Protector's Strike] (3) -> wait for proc ->  @[skill:9111:Symbol of Faith] (2) -> @[skill:15834:Shield of Judgment] (4)\n - at this point your stabs should be used as it comes off CD (use your own judgement)\n - Don't use 2 stab skills back to back unless under heavy strips with priority being given to @[skill:78358:Radiant Courage] F3 being used first. \n - Remember to also use @[skill:78837:Radiant Justice] F1 and @[skill:78604:Radiant Resolve] F2 off CD or as cover boons\n\n**Forge Rotation:**\n@[skill:77073:Enter Radiant Forge] (F4)\n@[skill:77339:Dazzling Hammer] (2) - this skill is a CC skill as well as a Might/Fury source\n@[skill:76708:Luminous Staff] (3) -> @[skill:77136:Restorative Glow] (3)\n *`Radiant Bulwark`* (5) =>  **pause 1.5 Sec**  => @[skill:76978:Brilliant Slam] (5) in order to grant boons, Heals and trigger @[trait:2368:Illuminating Inspiration] \n- ```You pause for 1.5 seconds and move slightly in front of the commander since *`Radiant Bulwark`* (5) is a block skill allowing you to soak dmg for the squad```\n@[skill:76616:Exit Radiant Forge]\n\n\n**Notes:**\n - Prioritize Radiant Forge Rotation during clashes as forge 3 allows you to take dmg for the squad and forge 5 is blocks allowing you to soak dmg. Radiant Bulwark would be in CD sometimes so you can skip that when in forge.\n - Ensure that you use all your F skills if its up before casting the radiant forge skills for more cd reduction on your F skills.\n - @[skill:9144:Line of Warding] Staff 5 should be held for commander calls, however if the commander doesn't call for them just drop them on enemy pushed or when we are pushing on the enemy\n - @[skill:76621:Resolute Stance] and @[skill:78604:Radiant Resolve] (f2) are able to deal massive condi cleanse so use them off cd if possible\n - @[skill:9224:Shield of Absorption] (5) is an aoe knockback so use it when CCs are called or whenever we are in a melee clash\n - stay in mace/shield for @[skill:9086:Protector's Strike]  protection uptime and swap to staff when @[skill:9153:\"Stand Your Ground!\"]  \n - your dodges will give you alacrity with @[relic:103015:Relic of Rivers]  now so dodge more when you can. \n - @[skill:9265:Empower] Staff 4 gives you and your squad endurance back as well on initial cast synergizing with the dodge but will root you. \n - most of your skills other than stab skills on your bar should always be in cd, including your elite skill in a fight.",
+      "notes": "![Luminary](https://render.guildwars2.com/file/034C203DBD60CFF19D3D5CE9E71B27CA0103F50D/3679898.png) Luminary Main Stabs\n - [Video](https://www.youtube.com/watch?v=tnwxyRZNQP8)\n\n\n\n**Rotation:**\n - On ~900 range, cast @[skill:9153:\"Stand Your Ground!\"]  -> @[skill:78837:Radiant Justice] F1\n - when moving towards/away from enemy blob cast @[skill:29965:\"Feel My Wrath!\"]  (elite skill)\n - On initial melee clash -> @[skill:78358:Radiant Courage] F3 -> @[skill:78604:Radiant Resolve] F2 \n - Rotation during melee clash: \n   1. Enter Forge -> Forge Rotation -> exit Forge\n   3. Staff @[skill:9143:Symbol of Swiftness] 3 and @[skill:9140:Holy Strike] 2 (if under heavy condi pressure)\n   4. @[skill:999999:Weapon Swap]  mace/shield\n   5. @[skill:9086:Protector's Strike] (3) -> wait for proc ->  @[skill:9111:Symbol of Faith] (2) -> @[skill:15834:Shield of Judgment] (4)\n - at this point your stabs should be used as it comes off CD (use your own judgement)\n - Don't use 2 stab skills back to back unless under heavy strips with priority being given to @[skill:78358:Radiant Courage] F3 being used first. \n - Remember to also use @[skill:78837:Radiant Justice] F1 and @[skill:78604:Radiant Resolve] F2 off CD or as cover boons\n\n**Forge Rotation:**\n@[skill:77073:Enter Radiant Forge] (F4)\n@[skill:77339:Dazzling Hammer] (2) - this skill is a CC skill as well as a Might/Fury source\n@[skill:76708:Luminous Staff] (3) -> @[skill:77136:Restorative Glow] (3)\n*`Radiant Bulwark`* (5) =>  **pause 1.5 Sec**  => @[skill:76978:Brilliant Slam] (5) in order to grant boons, Heals and trigger @[trait:2368:Illuminating Inspiration] \n- ```You pause for 1.5 seconds and move slightly in front of the commander since *`Radiant Bulwark`* (5) is a block skill allowing you to soak dmg for the squad```\n@[skill:76616:Exit Radiant Forge]\n\n\n**Notes:**\n - Prioritize Radiant Forge Rotation during clashes as forge 3 allows you to take dmg for the squad and forge 5 is blocks allowing you to soak dmg. Radiant Bulwark would be in CD sometimes so you can skip that when in forge.\n - Ensure that you use all your F skills if its up before casting the radiant forge skills for more cd reduction on your F skills.\n - @[skill:9144:Line of Warding] Staff 5 should be held for commander calls, however if the commander doesn't call for them just drop them on enemy pushed or when we are pushing on the enemy\n - @[skill:76621:Resolute Stance] and @[skill:78604:Radiant Resolve] (f2) are able to deal massive condi cleanse so use them off cd if possible\n - @[skill:9224:Shield of Absorption] (5) is an aoe knockback so use it when CCs are called or whenever we are in a melee clash\n - stay in mace/shield for @[skill:9086:Protector's Strike]  protection uptime and swap to staff when @[skill:9153:\"Stand Your Ground!\"]  \n - your dodges will give you alacrity with @[relic:103015:Relic of Rivers]  now so dodge more when you can. \n - @[skill:9265:Empower] Staff 4 gives you and your squad endurance back as well on initial cast synergizing with the dodge but will root you. \n - most of your skills other than stab skills on your bar should always be in cd, including your elite skill in a fight.",
       "tags": [
         "Main Stabs"
       ],
@@ -190,7 +190,7 @@
           "elite": true
         }
       ],
-      "updatedAt": "2026-09-15T13:17:12.408Z",
+      "updatedAt": "2026-09-15T13:39:05.916Z",
       "spaUrl": "./index.html?n=luminary-main-stabs&b=823fd78b.cuh1LmEdrEpKyWm8e4zJEsjkz87BZ0n7404vNQPWf6I"
     },
     {
@@ -272,6 +272,33 @@
       ],
       "updatedAt": "2026-09-14T14:48:29.176Z",
       "spaUrl": "./index.html?n=troubadour-boon-support&b=65182e5e.rKL8FYr0N7U-0vuacvbAEverx35qCJZwSW-Lc5-Z7mE"
+    },
+    {
+      "title": "Reaper Boon Rip DPS",
+      "profession": "Necromancer",
+      "notes": "![Reaper](https://wiki.guildwars2.com/images/6/6a/Reaper.png) Reaper Boon Rip DPS\n\n**Your Role:**   Pull, Boon Strip, and Damage Dealer\n\n---\n- [**Video**: Link](https://www.youtube.com/watch?v=8B0m_QRd1Zo&t=673s&ab_channel=metalloneGW2)\n\n- **Important Notes**:\n  * It is almost always better to save your wells for when the zerg fully commits and the enemy zerg stops maneuvering as much. Be patient in order to get maximum value from your wells.\n  * While DPS is tied to your Shroud uptime, your boon strips are increased the more times you enter Shroud.\n\n- Shroud Info\n  - Boon strip on entering shroud \n       - Try to enter shroud when you are close enough to the enemy zerg to maximize boon strips\n  - Additional dmg modifiers while in shroud\n    - +10% dmg\n    - +15% crit dmg\n    - +300 ferocity\n  - Removes movement impairing skills on entering shroud\n\n- Rotations\n  - Wells\n     - Cast well of corruption then well of suffering before entering shroud and doing the shroud rotation\n  - Shroud Rotation\n      - Enter @[skill:30792:Reaper's Shroud] when you are close to the enemy zerg\n          * @[skill:30825:Death's Charge] (2)\n          * @[skill:30504:Soul Spiral] (4)\n          * @[skill:30557:Executioner's Scythe] (5)\n          * @[skill:29958:Infusing Terror] (3)\n          * @[skill:30825:Death's Charge] (2)\n          * Exit @[skill:30792:Reaper's Shroud]\n      - @[skill:29958:Infusing Terror] reduces dmg taken and provides pulsing self stabs and will not cancel @[skill:30504:Soul Spiral]\n  - When not in shroud:\n    - Aim to build life force ASAP using:\n       - @[skill:29666:\"Nothing Can Save You!\"]  (Boon strips and makes your attacks unblockable) \n       - @[skill:30488:\"Your Soul Is Mine!\"]  \n       - @[skill:30105:\"Chilled to the Bone!\"] \n       - @[skill:30860:Death Spiral] (GS3)\n       - @[skill:29740:Grasping Darkness] (GS5)\n       - @[skill:10701:Unholy Feast] (Ax3)\n       - @[skill:10555:Spinal Shivers] (Focus5)\n     - Always aim to enter shroud as many times as possible during fights\n\n\n- Additional Notes:\n  - Try to use Nothing Can Save You! before Your Soul Is Mine! or Chilled To The Bone! to maximize the unblockable attacks from Nothing Can Save You!.\n  - Nothing Can Save You! gives you 10 unblockable attacks ensuring that you would land your hits from:\n  - Your Soul Is Mine! for additional life force generation",
+      "tags": [
+        "Boon Rip"
+      ],
+      "specializations": [
+        {
+          "name": "Spite",
+          "icon": "https://render.guildwars2.com/file/2D34377B04051FFDCDB553C7DCDABCD5DFBB68D7/1012011.png",
+          "elite": false
+        },
+        {
+          "name": "Soul Reaping",
+          "icon": "https://render.guildwars2.com/file/A5A95CB5FADD99F59E07400907F0782B659574A9/1012010.png",
+          "elite": false
+        },
+        {
+          "name": "Reaper",
+          "icon": "https://render.guildwars2.com/file/530A582BD864B73AF5CC6C44F9C61954322D9A15/1012009.png",
+          "elite": true
+        }
+      ],
+      "updatedAt": "2026-10-03T14:15:33.753Z",
+      "spaUrl": "./index.html?n=reaper-boon-rip-dps&b=2ff01775.c5eR6KLkiZUQIV1yVhisYDR9rnkk8AFl6Y3EviMb97A"
     }
   ]
 }
