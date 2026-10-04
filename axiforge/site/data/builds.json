@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-03T14:15:35.174Z",
+  "generatedAt": "2026-10-04T20:11:30.405Z",
   "builds": [
     {
       "title": "Standard Druid Healer",
@@ -23,7 +23,7 @@
           "elite": true
         }
       ],
-      "updatedAt": "2026-09-13T22:23:38.937Z",
+      "updatedAt": "2026-10-04T20:11:26.788Z",
       "spaUrl": "./index.html?n=standard-druid-healer&b=98dc332b.tDAstBf4XQRF2T5nU_njvVVWMCfrWS6jy0VJ8aGityI"
     },
     {
@@ -218,7 +218,7 @@
           "elite": true
         }
       ],
-      "updatedAt": "2026-09-14T14:01:27.037Z",
+      "updatedAt": "2026-10-03T14:15:51.160Z",
       "spaUrl": "./index.html?n=scourge-boon-rip-dps&b=ea8ee169.r_y3ioKPstFpvrqxHWq5Mdj6G_CcwpkBfcvzBGnwA50"
     },
     {
@@ -297,7 +297,7 @@
           "elite": true
         }
       ],
-      "updatedAt": "2026-10-03T14:15:33.753Z",
+      "updatedAt": "2026-10-03T14:15:56.830Z",
       "spaUrl": "./index.html?n=reaper-boon-rip-dps&b=2ff01775.c5eR6KLkiZUQIV1yVhisYDR9rnkk8AFl6Y3EviMb97A"
     }
   ]
